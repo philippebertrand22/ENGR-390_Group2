@@ -20,6 +20,5 @@ public class GPSActivity extends AppCompatActivity {
 
     private void setupUI() {
         GPSdata = findViewById(R.id.textViewGPSId);
-
     }
 }

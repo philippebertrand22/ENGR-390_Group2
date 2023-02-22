@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //generate visuals
+
         setupUI();
 
         onClickListeners();
@@ -30,13 +30,28 @@ public class MainActivity extends AppCompatActivity {
         buttonGPS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                gotoGPSActivity();
+                startNextActivity(GPSActivity.class);
+            }
+        });
+
+        buttonAcc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startNextActivity(StepsActivity.class);
+            }
+        });
+
+        buttonHR.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startNextActivity(BPMActivity.class);
             }
         });
     }
 
-    private void gotoGPSActivity() {
-        Intent intent = new Intent(this, GPSActivity.class);
+    // Function to start a new activity. We pass in the destination Activity name as param
+    private void startNextActivity(Class<?> destinationActivity) {
+        Intent intent = new Intent(this, destinationActivity);
         startActivity(intent);
     }
 
@@ -45,6 +60,5 @@ public class MainActivity extends AppCompatActivity {
         buttonHR = findViewById(R.id.heartrateButtonId);
         buttonAcc = findViewById(R.id.accelerometerButtonId);
     }
-
 
 }
