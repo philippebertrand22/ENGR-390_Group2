@@ -7,40 +7,35 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity {
+public class homeActivity extends AppCompatActivity {
 
-    private Button summaryButton;
+    private Button startRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
+        setContentView(R.layout.activity_home);
 
         setupUI();
-
         onClickListeners();
     }
 
     private void onClickListeners() {
-        summaryButton.setOnClickListener(new View.OnClickListener() {
+        startRunning.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(summaryActivity.class);
+                startActivity(MainActivity.class);
             }
         });
 
     }
-
-    // Function to start a new activity. We pass in the destination Activity name as param
     private void startActivity(Class<?> destinationActivity) {
         Intent intent = new Intent(this, destinationActivity);
         startActivity(intent);
     }
-
     private void setupUI() {
-        summaryButton = findViewById(R.id.summaryButtonID);
-    }
+        startRunning = findViewById(R.id.startRunningButtonID);
 
+    }
 
 }
