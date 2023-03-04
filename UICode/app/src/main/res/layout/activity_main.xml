@@ -9,7 +9,7 @@
     tools:layout_editor_absoluteY="30dp">
 
     <TextView
-        android:id="@+id/BPMTextView"
+        android:id="@+id/BPMTextID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="BPM"
@@ -24,7 +24,7 @@
         app:layout_constraintVertical_bias="0.695" />
 
     <TextView
-        android:id="@+id/BPMValueView"
+        android:id="@+id/BPMValueID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="BPM"
@@ -39,7 +39,7 @@
         app:layout_constraintVertical_bias="0.589" />
 
     <TextView
-        android:id="@+id/distanceTextView"
+        android:id="@+id/distanceTextID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Distance"
@@ -54,7 +54,7 @@
         app:layout_constraintVertical_bias="0.458" />
 
     <TextView
-        android:id="@+id/distanceValueView"
+        android:id="@+id/distanceValueID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Distance"
@@ -69,7 +69,7 @@
         app:layout_constraintVertical_bias="0.345" />
 
     <TextView
-        android:id="@+id/timeTextView"
+        android:id="@+id/timeTextID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Time"
@@ -83,10 +83,10 @@
         app:layout_constraintVertical_bias="0.233" />
 
     <TextView
-        android:id="@+id/timeValueView"
+        android:id="@+id/timeValueID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Time"
+        android:text="00:00:00"
         android:textAllCaps="true"
         android:textColor="#000000"
         android:textSize="42sp"
@@ -97,7 +97,7 @@
         app:layout_constraintVertical_bias="0.112" />
 
     <TextView
-        android:id="@+id/speedTextView"
+        android:id="@+id/speedTextID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Speed"
@@ -112,7 +112,7 @@
         app:layout_constraintVertical_bias="0.695" />
 
     <TextView
-        android:id="@+id/speedValueView"
+        android:id="@+id/speedValueID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Speed"
@@ -126,15 +126,40 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.589" />
 
-    <Button
-        android:id="@+id/summaryButtonID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/stopButtonID"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:text="Go to Summary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.650"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.868"
+        android:src="@drawable/baseline_stop_24" />
+
+    <ImageView
+        android:id="@+id/pauseButtonId"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.504"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.868" />
+        app:layout_constraintVertical_bias="0.868"
+        app:srcCompat="@drawable/baseline_pause_24" />
+
+    <ImageView
+        android:id="@+id/playButtonID"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.350"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.868"
+        app:srcCompat="@drawable/baseline_play_arrow_24" />
 </androidx.constraintlayout.widget.ConstraintLayout>
