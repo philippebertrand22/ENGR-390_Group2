@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "239096142731",
+    "firebase_url": "https://fitnessdata-6cc1e-default-rtdb.firebaseio.com",
+    "project_id": "fitnessdata-6cc1e",
+    "storage_bucket": "fitnessdata-6cc1e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:239096142731:android:06764a6f15ce0b8e8e6d8e",
+        "android_client_info": {
+          "package_name": "com.example.ui_code"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "239096142731-0gpfav4sr2fo55kuaig15hjk6bnqhktt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAizrnOavEJ7RLm5eQhPf_DaBCvaZA3c2M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "239096142731-0gpfav4sr2fo55kuaig15hjk6bnqhktt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
