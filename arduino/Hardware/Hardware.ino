@@ -2,6 +2,9 @@
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 
+// GPIO PIN for the Pulse Heart Rate Sensor
+#define IR_SENSOR_GPIO_Input_PIN 13
+
 // GPIO Pins for the NEO-7M GPS Module
 #define RX_GPIO_PIN 34
 #define TX_GPIO_PIN 35
@@ -20,15 +23,24 @@ void setup() {
 
   gpsSerial.begin(GPSBaud); // Software serial initialisation
 
+  pinMode(IR_SENSOR_GPIO_Input_PIN, INPUT); // Reading Input from IR_Sensor through GPIO 13
+
 }
 
 void setup(){
  while (gpsSerial.available() > 0) 
    if(gps.encode(gpsSerial.read())){
       displayGPSInfo();
-      delay(100);
+      displayPulse();
    }
 
+}
+
+void displayPulse(){
+  int irValue = digitalRead(IR_SENSOR_PIN); // Read the IR sensor value
+  Serial.print("Pulse detected:"); 
+  Serial.println(irValue); // Print the value to the serial monitor either HIGH or LOW
+  delay(1000);
 }
 
 void displayGPSInfo()
