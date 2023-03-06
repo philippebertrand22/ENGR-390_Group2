@@ -96,6 +96,7 @@ void loop(){
       // displayPulse();
       writeGPSDatatoFirebase();
       writePulseSensorDatatoFirebase();
+      writeAccelerometerDatatoFirebase();
       Serial.println("DATA SUCCESSFULY STORED IN JSON FILE");
       delay(100);
       } else {
@@ -138,6 +139,42 @@ void writeGPSDatatoFirebase(){
      Firebase.RTDB.setString(&fbdo, "GPSData/Date", date);
      Firebase.RTDB.setString(&fbdo, "GPSData/Time", time);
 }
+
+void writeAccelerometerDatatoFirebase(){
+        // Start Reading Data from the LSM9DS1 sensor   
+        imu.readAccel();
+        imu.readGyro();
+        imu.readMag();
+
+       // Get the Accelerometer sensor data 
+        float accelX = imu.ax;
+        float accelY = imu.ay;
+        float accelZ = imu.az;                     
+  
+        float gyroX = imu.gx;
+        float gyroY = imu.gy;
+        float gyroZ = imu.gz;
+  
+        float magX = imu.mx;
+        float magY = imu.my;
+        float magZ = imu.mz;
+
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/x", accelX);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/y", accelY);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/z", accelZ);
+
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Gyroscope/x", gyroX);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Gyroscope/y", gyroY);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Gyroscope/z", gyroZ);
+
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Mag/x", magX);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Mag/y", magY);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Mag/z", magZ);
+        
+        delay(10);
+}
+
+
 
 // void displayPulse(){
 //   int irValue = digitalRead(IR_SENSOR_PIN); // Read the IR sensor value
