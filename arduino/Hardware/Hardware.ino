@@ -6,6 +6,19 @@
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 
+//Firebase Libraries
+#include <Firebase_ESP_Client.h>
+#include "addons/TokenHelper.h"
+#include "addons/RTDBHelper.h"
+
+// Wifi Information
+#define WIFI_SSID "Helix.B590" // Wifi Name
+#define WIFI_PASSWORD "11111111"   // Wifi Password
+
+// Firebase Database API Key & URL
+#define API_KEY "AIzaSyCSK8XFtg3bPjTbOkvPT2JsBXwBTIRDWl8" // Firebase Project API Key
+#define DATABASE_URL "https://fitnessdata-6cc1e-default-rtdb.firebaseio.com/" // FireBase Database URL
+
 // GPIO PIN for the Pulse Heart Rate Sensor
 #define IR_SENSOR_GPIO_Input_PIN 13
 
@@ -24,6 +37,17 @@ static const uint32_t GPSBaud = 9600;
 
 // SparkFunk LSM9DS1 Accelerometer object
 LSM9DS1 imu;
+
+// Firebase Data Json Object
+FirebaseData fbdo;
+
+// Firebase Authentication - Anonynous User was defined for now
+FirebaseAuth auth;
+
+// Firebase Configuration to specify URL and API Key 
+FirebaseConfig config;
+
+bool signupisOk = false;
 
 void setup() {
   Serial.begin(115200);
