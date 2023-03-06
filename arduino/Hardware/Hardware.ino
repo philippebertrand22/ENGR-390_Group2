@@ -95,6 +95,7 @@ void loop(){
       displayGPSInfo();
       // displayPulse();
       writeGPSDatatoFirebase();
+      writePulseSensorDatatoFirebase();
       Serial.println("DATA SUCCESSFULY STORED IN JSON FILE");
       delay(100);
       } else {
@@ -103,6 +104,12 @@ void loop(){
     }
   delay(800);
 
+}
+
+void writePulseSensorDatatoFirebase(){
+  int irValue = digitalRead(IR_SENSOR_GPIO_Input_PIN); // Read the IR sensor value HIGH or LOW
+  Firebase.RTDB.setInt(&fbdo, "Pulse Sensor/State", irValue);
+  delay(10);
 }
 
 void writeGPSDatatoFirebase(){
