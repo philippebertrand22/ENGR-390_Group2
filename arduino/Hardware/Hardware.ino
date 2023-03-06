@@ -35,6 +35,8 @@ TinyGPSPlus gps;
 // Specifying the GPS Baud Rate for the software serial
 static const uint32_t GPSBaud = 9600;
 
+unsigned long sendDataPrevMillis = 0;
+
 // SparkFunk LSM9DS1 Accelerometer object
 LSM9DS1 imu;
 
@@ -56,27 +58,86 @@ void setup() {
 
   pinMode(IR_SENSOR_GPIO_Input_PIN, INPUT); // Reading Input from IR_Sensor through GPIO 13
 
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to Wi-Fi");
+  while(WiFi.status() != WL_CONNECTED){
+    Serial.print(".");
+    delay(200);
+  }
+  Serial.println();
+  Serial.print("Connecting with IP address:");
+  Serial.println(WiFi.localIP());
+  Serial.println();
+
   Wire.begin(); // Using Wire for the Accelerometer conncetions
   imu.begin(); 
 
+  config.api_key = API_KEY;
+  config.database_url = DATABASE_URL;
+ 
+  if(Firebase.signUp(&config, &auth, "", "")){
+    Serial.println("SignUp is Ok");
+    signupisOk = true; 
+   } else {
+    Serial.println(config.signer.signupError.message.c_str());
+   }
+   config.token_status_callback = tokenStatusCallback;
+   Firebase.begin(&config,&auth);
+   Firebase.reconnectWiFi(true); 
+
 }
 
-void setup(){
+void loop(){
  while (gpsSerial.available() > 0) 
    if(gps.encode(gpsSerial.read())){
+    if(Firebase.ready() && signupisOk && (millis() - sendDataPrevMillis > 5000 || sendDataPrevMillis == 0) ){
       displayAccelInfo();
       displayGPSInfo();
-      displayPulse();
-   }
+      // displayPulse();
+      writeGPSDatatoFirebase();
+      Serial.println("DATA SUCCESSFULY STORED IN JSON FILE");
+      delay(100);
+      } else {
+           Serial.println("Error: Firebase is not ready or SignUp failed!");
+      }
+    }
+  delay(800);
 
 }
 
-void displayPulse(){
-  int irValue = digitalRead(IR_SENSOR_PIN); // Read the IR sensor value
-  Serial.print("Pulse detected:"); 
-  Serial.println(irValue); // Print the value to the serial monitor either HIGH or LOW
-  delay(1000);
+void writeGPSDatatoFirebase(){
+     double lat = gps.location.lat();
+     double lng = gps.location.lng();
+     double alt = gps.altitude.meters();
+
+     uint8_t month = gps.date.month();
+     uint8_t day = gps.date.day();
+     uint16_t year = gps.date.year();
+
+     uint8_t hour = gps.time.hour();
+     uint8_t min = gps.time.minute();
+     uint8_t sec = gps.time.second();
+     uint8_t centis = gps.time.centisecond();
+
+     String date = "";
+     date += String(month) + "/" + String(day) + "/" + String(year);
+
+     String time = "";
+     time +=  String(hour) + ":" + String(min) + ":" + String(sec) + ":" + String(centis);
+    
+     Firebase.RTDB.setDouble(&fbdo, "GPSData/Latitude", lat);
+     Firebase.RTDB.setDouble(&fbdo, "GPSData/Longitude", lng);
+     Firebase.RTDB.setDouble(&fbdo, "GPSData/Altitude", alt);
+     Firebase.RTDB.setString(&fbdo, "GPSData/Date", date);
+     Firebase.RTDB.setString(&fbdo, "GPSData/Time", time);
 }
+
+// void displayPulse(){
+//   int irValue = digitalRead(IR_SENSOR_PIN); // Read the IR sensor value
+//   Serial.print("Pulse detected:"); 
+//   Serial.println(irValue); // Print the value to the serial monitor either HIGH or LOW
+//   delay(1000);
+// }
 
 void displayAccelInfo() {
   imu.readAccel();
