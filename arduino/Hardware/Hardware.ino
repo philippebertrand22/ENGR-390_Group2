@@ -1,3 +1,7 @@
+// Accelerometer Libraries
+#include <Wire.h>
+#include <SparkFunLSM9DS1.h>
+
 // GPS Libraries
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
@@ -18,6 +22,9 @@ TinyGPSPlus gps;
 // Specifying the GPS Baud Rate for the software serial
 static const uint32_t GPSBaud = 9600;
 
+// SparkFunk LSM9DS1 Accelerometer object
+LSM9DS1 imu;
+
 void setup() {
   Serial.begin(115200);
 
@@ -25,11 +32,15 @@ void setup() {
 
   pinMode(IR_SENSOR_GPIO_Input_PIN, INPUT); // Reading Input from IR_Sensor through GPIO 13
 
+  Wire.begin(); // Using Wire for the Accelerometer conncetions
+  imu.begin(); 
+
 }
 
 void setup(){
  while (gpsSerial.available() > 0) 
    if(gps.encode(gpsSerial.read())){
+      displayAccelInfo();
       displayGPSInfo();
       displayPulse();
    }
@@ -41,6 +52,62 @@ void displayPulse(){
   Serial.print("Pulse detected:"); 
   Serial.println(irValue); // Print the value to the serial monitor either HIGH or LOW
   delay(1000);
+}
+
+void displayAccelInfo() {
+  imu.readAccel();
+  imu.readGyro();
+  imu.readMag();
+  
+  float accelX = imu.ax;
+  float accelY = imu.ay;
+  float accelZ = imu.az;
+  
+  float gyroX = imu.gx;
+  float gyroY = imu.gy;
+  float gyroZ = imu.gz;
+  
+  float magX = imu.mx;
+  float magY = imu.my;
+  float magZ = imu.mz;
+
+
+  Serial.println();
+  Serial.println("Acceleration:");
+  Serial.print("X: ");
+  Serial.print(accelX);
+  Serial.print("||");
+  Serial.print("Y: ");
+  Serial.print(accelY);
+  Serial.print("||");
+  Serial.print("Z: ");
+  Serial.print(accelZ);
+  Serial.print("||");
+
+  Serial.println();
+  Serial.println("Gyroscope:");
+  Serial.print("X: ");
+  Serial.print(gyroX);
+  Serial.print("||");
+  Serial.print("Y: ");
+  Serial.print(gyroY);
+  Serial.print("||");
+  Serial.print("Z: ");
+  Serial.print(gyroZ);
+  Serial.print("||");
+
+  Serial.println(); 
+  Serial.println("Magnitude:");
+  Serial.print("X: ");
+  Serial.print(magX);
+  Serial.print("||");
+  Serial.print("Y: ");
+  Serial.print(magY);
+  Serial.print("||");
+  Serial.print("Z: ");
+  Serial.print(magZ);
+  Serial.print("||");
+  Serial.println(); 
 }
 
 void displayGPSInfo()
