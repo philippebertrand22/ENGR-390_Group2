@@ -11,4 +11,5 @@ public class summaryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
     }
+
 }
