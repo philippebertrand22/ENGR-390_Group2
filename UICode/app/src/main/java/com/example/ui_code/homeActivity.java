@@ -13,7 +13,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class homeActivity extends AppCompatActivity {
+import com.google.firebase.database.ValueEventListener;
+import java.util.EventListener;
+public class homeActivity extends AppCompatActivity implements EventListener{
     private Button startRunning, steps;
 
     private TextView Pulse, Longitude,Latitude,Altitude, Date, Time;
@@ -114,13 +116,11 @@ public class homeActivity extends AppCompatActivity {
              }
         });
 
-        databaseGPSReference.child("Time").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+        databaseGPSReference.child("Time").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String output = "Time : " + dataSnapshot.getValue().toString();
-                    Time.setText(output);
-                }
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String output = snapshot.getValue().toString();
+                Time.setText(output);
             }
         });
 
