@@ -98,8 +98,6 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="420dp"
-        tools:context=".MapsActivity"
-        tools:showIn="@layout/activity_maps"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_margin="20dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
