@@ -1,5 +1,6 @@
 package com.example.ui_code;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -13,7 +14,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class homeActivity extends AppCompatActivity {
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class homeActivity extends AppCompatActivity implements OnMapReadyCallback {
     private Button startRunning, steps;
 
     private TextView Pulse, Longitude,Latitude,Altitude, Date, Time;
@@ -25,6 +32,10 @@ public class homeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
         setupUI();
         onClickListeners();
     }
@@ -77,10 +88,10 @@ public class homeActivity extends AppCompatActivity {
         databaseGPSReference.child("Latitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        String output = "Latitude : " + dataSnapshot.getValue().toString();
-                        Latitude.setText(output);
-                    }
+                if (dataSnapshot.exists()) {
+                    String output = "Latitude : " + dataSnapshot.getValue().toString();
+                    Latitude.setText(output);
+                }
             }
         });
 
@@ -111,7 +122,7 @@ public class homeActivity extends AppCompatActivity {
                     String output = "Date : " + dataSnapshot.getValue().toString();
                     Date.setText(output);
                 }
-             }
+            }
         });
 
         databaseGPSReference.child("Time").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
@@ -126,4 +137,8 @@ public class homeActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        googleMap.addMarker(new MarkerOptions().position(new LatLng(0,0)).title("Marker"));
+    }
 }
