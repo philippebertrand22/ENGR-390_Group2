@@ -51,6 +51,14 @@ FirebaseConfig config;
 
 bool signupisOk = false;
 
+float accelX = 1;
+float accelY = 1;
+float accelZ = 1;
+float accelXRaw = 1;
+float accelYRaw = 1;
+float accelZRaw = 1;
+
+
 void setup() {
   Serial.begin(115200);
 
@@ -96,11 +104,12 @@ void loop(){
    if(gps.encode(gpsSerial.read())){
     if(Firebase.ready() && signupisOk && (millis() - sendDataPrevMillis > 5000 || sendDataPrevMillis == 0) ){
       displayAccelInfo();
-      displayGPSInfo();
+      // displayGPSInfo();
       // displayPulse();
       writeGPSDatatoFirebase();
       writePulseSensorDatatoFirebase();
-      writeAccelerometerDatatoFirebase();
+      stepCount();
+
       Serial.println("DATA SUCCESSFULY STORED IN JSON FILE");
       delay(100);
       } else {
@@ -144,25 +153,28 @@ void writeGPSDatatoFirebase(){
      Firebase.RTDB.setString(&fbdo, "GPSData/Time", time);
 }
 
-void writeAccelerometerDatatoFirebase(){
-        // Start Reading Data from the LSM9DS1 sensor   
-        imu.readAccel();
+void writeAccelerometerDatatoFirebase(float* filter){
 
-       // Get the Accelerometer sensor data 
-        float accelX = imu.ax;
-        float accelY = imu.ay;
-        float accelZ = imu.az;                     
-  
         Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/x", accelX);
         Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/y", accelY);
         Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/z", accelZ);
+
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/x_grav", accelXRaw);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/y_grav", accelYRaw);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/z_grav", accelZRaw);
+
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter0", filter[0]);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter1", filter[1]);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter2", filter[2]);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter3", filter[3]);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter4", filter[4]);
+
 
         delay(10);
 }
 
 void stepCount(){
   /*
-
   https://www.aosabook.org/en/500L/a-pedometer-in-the-real-world.html
   Rolling array of accel data
   3 filters:
@@ -179,8 +191,67 @@ void stepCount(){
   Filter the data for low pass and high pass
   Dot product the data in the direction of gravity
   If threshold is met, increment step
+  */
 
-   */
+  int arraysize = 5;
+  float accel_along_gravity[arraysize] = {0.0};
+  float filtered_accel[arraysize] = {0.0}; //Final array that will hold the data after two filters
+  float filtered_accel_low_pass[arraysize] = {0.0};
+
+  // IIR alpha and beta coefficients from the internet
+  float coefficients_low_pass_5Hz[] = {0.095465967120306, -0.172688631608676, 0.095465967120306, -1.80898117793047, 0.827224480562408};
+  float coefficients_high_pass_1Hz[] = {0.953986986993339, -1.907503180919730, 0.953986986993339, -1.905384612118461, 0.910092542787947};
+
+  // Get accel values along gravity axis
+  for (int i = 0; i < arraysize ; i++)
+  {
+    // Get the accel data
+    imu.readAccel();
+
+    // accel data with the gravity's accel removed
+    accelX = imu.ax;
+    accelY = imu.ay;
+    accelZ = imu.az;
+
+    // accel data of just gravity
+    accelXRaw = imu.aBiasRaw[X_AXIS];
+    accelYRaw = imu.aBiasRaw[Y_AXIS];
+    accelZRaw = imu.aBiasRaw[Z_AXIS];
+
+    // Dot product of accel and gravity accel
+    // Calculates the user-acceleration in the direction of gravity regardless of the sensor's orientation
+    float dot_product =
+        accelX * accelXRaw + accelY * accelYRaw + accelZ * accelZRaw;
+
+    accel_along_gravity[i] = dot_product;
+
+    delay(10);
+  }
+
+  // Infinite Impulse Response filter
+  // Filter low pass below 5Hz
+  for (int i = 2; i < arraysize ; i++){
+    filtered_accel_low_pass[i] = (
+      accel_along_gravity[i]          * coefficients_low_pass_5Hz[0] +
+      accel_along_gravity[i-1]        * coefficients_low_pass_5Hz[1] +
+      accel_along_gravity[i-2]        * coefficients_low_pass_5Hz[2] -
+      filtered_accel_low_pass[i-1]    * coefficients_low_pass_5Hz[3] -
+      filtered_accel_low_pass[i-2]    * coefficients_low_pass_5Hz[4]
+      );}
+
+  // Second Filter now high pass above 1Hz
+  for (int i = 2; i < arraysize ; i++){
+    filtered_accel[i] = (
+      filtered_accel_low_pass[i]      * coefficients_high_pass_1Hz[0] +
+      filtered_accel_low_pass[i-1]    * coefficients_high_pass_1Hz[1] +
+      filtered_accel_low_pass[i-2]    * coefficients_high_pass_1Hz[2] -
+      filtered_accel[i-1]             * coefficients_high_pass_1Hz[3] -
+      filtered_accel[i-2]             * coefficients_high_pass_1Hz[4]
+      );}
+
+
+  writeAccelerometerDatatoFirebase(filtered_accel);  
+
 }
 
 // void displayPulse(){
@@ -191,12 +262,7 @@ void stepCount(){
 // }
 
 void displayAccelInfo() {
-  imu.readAccel();
-  
-  float accelX = imu.ax;
-  float accelY = imu.ay;
-  float accelZ = imu.az;
-  
+ 
   Serial.println();
   Serial.println("Acceleration:");
   Serial.print("X: ");
@@ -207,6 +273,18 @@ void displayAccelInfo() {
   Serial.print("||");
   Serial.print("Z: ");
   Serial.print(accelZ);
+  Serial.print("||");
+
+  Serial.println();
+  Serial.println("Acceleration along gravity:");
+  Serial.print("X: ");
+  Serial.print(accelXRaw);
+  Serial.print("||");
+  Serial.print("Y: ");
+  Serial.print(accelYRaw);
+  Serial.print("||");
+  Serial.print("Z: ");
+  Serial.print(accelZRaw);
   Serial.print("||");
 }
 
