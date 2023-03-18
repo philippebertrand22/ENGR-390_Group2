@@ -44,6 +44,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class homeActivity extends AppCompatActivity implements OnMapReadyCallback {
     private Button startRunning, steps;
@@ -53,30 +55,15 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DatabaseReference databaseGPSReference, databasePulseReference;
     private static final String TAG = homeActivity.class.getSimpleName();
     private GoogleMap map;
-    private CameraPosition cameraPosition;
 
-    private PlacesClient placesClient;
+    double locationLatitude;
+    double locationLongitude;
 
-    private FusedLocationProviderClient fusedLocationProviderClient;
+    Timer timer;
 
-    // A default location (Sydney, Australia) and default zoom to use when location permission is
-    // not granted.
-    private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
-    private static final int DEFAULT_ZOOM = 15;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private boolean locationPermissionGranted;
-    private Location lastKnownLocation;
-    // Used for selecting the current place.
-    private static final int M_MAX_ENTRIES = 5;
-    private String[] likelyPlaceNames;
-    private String[] likelyPlaceAddresses;
-    private List[] likelyPlaceAttributions;
-    private LatLng[] likelyPlaceLatLngs;
+    TimerTask timerTask;
 
-
-    private static final String KEY_CAMERA_POSITION = "camera_position";
-    private static final String KEY_LOCATION = "location";
-
+    Double time = 0.0;
 
 
     @Override
@@ -84,23 +71,8 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Retrieve location and camera position from saved instance state.
-        if (savedInstanceState != null) {
-            lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
-        }
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        Places.initialize(getApplicationContext(), getString(R.string.maps_api_key));
-        placesClient = Places.createClient(this);
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-        //refreshing map and finding current location
-        updateLocationUI();
-        getDeviceLocation();
 
         setupUI();
         onClickListeners();
@@ -157,6 +129,8 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (dataSnapshot.exists()) {
                     String output = "Latitude : " + dataSnapshot.getValue().toString();
                     Latitude.setText(output);
+                    String latitude = dataSnapshot.getValue().toString();
+                    locationLatitude = Double.parseDouble(latitude);
                 }
             }
         });
@@ -167,6 +141,8 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (dataSnapshot.exists()) {
                     String output = "Longitude : " + dataSnapshot.getValue().toString();
                     Longitude.setText(output);
+                    String longitude = dataSnapshot.getValue().toString();
+                    locationLatitude = Double.parseDouble(longitude);
                 }
             }
         });
@@ -201,171 +177,19 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
     }
-    private void getLocationPermission(){
-        //request user permission to find location
-        if(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-            locationPermissionGranted = true;
-        }
-        else{
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
-        locationPermissionGranted = false;
-        if(requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                locationPermissionGranted = true;
-            }
-            else{
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            }
-            updateLocationUI();
-        }
-    }
-
-    private void updateLocationUI() {
-        if (map == null){
-            return;
-        }
-        try{
-            if(locationPermissionGranted){
-                map.setMyLocationEnabled(true);
-                map.getUiSettings().setMyLocationButtonEnabled(true);
-            }
-            else{
-                map.setMyLocationEnabled(false);
-                map.getUiSettings().setMyLocationButtonEnabled(false);
-                lastKnownLocation = null;
-                getLocationPermission();
-            }
-        }catch (SecurityException e){
-            Log.e("Exception: %s", e.getMessage());
-        }
-    }
-
-    private void getDeviceLocation() {    try {
-        if (locationPermissionGranted) {
-            Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-            locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                @Override
-                public void onComplete(@NonNull Task<Location> task) {
-                    if (task.isSuccessful()) {
-                        // Set the map's camera position to the current location of the device.
-                        lastKnownLocation = task.getResult();
-                        if (lastKnownLocation != null) {
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(lastKnownLocation.getLatitude(),
-                                            lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                        }
-                    } else {
-                        Log.d(TAG, "Current location is null. Using defaults.");
-                        Log.e(TAG, "Exception: %s", task.getException());
-                        map.moveCamera(CameraUpdateFactory.
-                                newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-                        map.getUiSettings().setMyLocationButtonEnabled(false);
-                    }
-                }
-            });
-        }
-    } catch (SecurityException e)  {
-        Log.e("Exception: %s", e.getMessage(), e);
-    }
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.current_place_menu, menu);
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.option_get_place) {
-            showCurrentPlace();
-        }
-        return true;
-    }
-    private void showCurrentPlace() {
-        if (map == null) {
-            return;
-        }
-
-        if (locationPermissionGranted) {
-            // Use fields to define the data types to return.
-            List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS,
-                    Place.Field.LAT_LNG);
-
-            // Use the builder to create a FindCurrentPlaceRequest.
-            FindCurrentPlaceRequest request =
-                    FindCurrentPlaceRequest.newInstance(placeFields);
-
-            // Get the likely places - that is, the businesses and other points of interest that
-            // are the best match for the device's current location.
-            @SuppressWarnings("MissingPermission") final
-            Task<FindCurrentPlaceResponse> placeResult =
-                    placesClient.findCurrentPlace(request);
-            placeResult.addOnCompleteListener (new OnCompleteListener<FindCurrentPlaceResponse>() {
-                @Override
-                public void onComplete(@NonNull Task<FindCurrentPlaceResponse> task) {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        FindCurrentPlaceResponse likelyPlaces = task.getResult();
-
-                        // Set the count, handling cases where less than 5 entries are returned.
-                        int count;
-                        if (likelyPlaces.getPlaceLikelihoods().size() < M_MAX_ENTRIES) {
-                            count = likelyPlaces.getPlaceLikelihoods().size();
-                        } else {
-                            count = M_MAX_ENTRIES;
-                        }
-
-                        int i = 0;
-                        likelyPlaceNames = new String[count];
-                        likelyPlaceAddresses = new String[count];
-                        likelyPlaceAttributions = new List[count];
-                        likelyPlaceLatLngs = new LatLng[count];
-
-                        for (PlaceLikelihood placeLikelihood : likelyPlaces.getPlaceLikelihoods()) {
-                            // Build a list of likely places to show the user.
-                            likelyPlaceNames[i] = placeLikelihood.getPlace().getName();
-                            likelyPlaceAddresses[i] = placeLikelihood.getPlace().getAddress();
-                            likelyPlaceAttributions[i] = placeLikelihood.getPlace()
-                                    .getAttributions();
-                            likelyPlaceLatLngs[i] = placeLikelihood.getPlace().getLatLng();
-
-                            i++;
-                            if (i > (count - 1)) {
-                                break;
-                            }
-                        }
-                    }
-                    else {
-                        Log.e(TAG, "Exception: %s", task.getException());
-                    }
-                }
-            });
-        } else {
-            // The user has not granted permission.
-            Log.i(TAG, "The user did not grant location permission.");
-
-            // Prompt the user for permission.
-            getLocationPermission();
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        if (map != null) {
-            outState.putParcelable(KEY_CAMERA_POSITION, map.getCameraPosition());
-            outState.putParcelable(KEY_LOCATION, lastKnownLocation);
-        }
-        super.onSaveInstanceState(outState);
-    }
-
-
 
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
-        map.addMarker(new MarkerOptions().position(new LatLng(0,0)).title("Marker"));
+        map.addMarker(new MarkerOptions().position(new LatLng(-15, 30)).title("Random"));
+        LatLng here = new LatLng(locationLatitude,locationLongitude);
+        map.addMarker(new MarkerOptions().position(here).title("Marker"));
+        moveToCurrentLocation(here);
+    }
+
+    private void moveToCurrentLocation(LatLng currentLocation) {
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+        map.animateCamera(CameraUpdateFactory.zoomIn());
+        map.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
     }
 }
