@@ -22,22 +22,16 @@ import android.widget.TextView;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
-import com.android.volley.BuildConfig;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
-import com.google.android.libraries.places.api.net.PlacesClient;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -69,6 +63,10 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
     public double locationLongitude;
     private DatabaseReference databaseGPSReference, databasePulseReference, databaseStepReference;
 
+    private FirebaseAuth mAuth;
+
+    private FirebaseUser user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +77,9 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
 
         setupUI();
         onClickListeners();
+
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser(); // Use this to get any user info from the database
     }
 
     private void onClickListeners() {
@@ -186,7 +187,7 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
         databaseGPSReference.child("Time").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        String output = snapshot.getValue().toString();
+                        String output = "Date : " + snapshot.getValue().toString();
                         Time.setText(output);
             }
             @Override
