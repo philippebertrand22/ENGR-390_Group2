@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -19,22 +20,25 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.core.EventTarget;
 
-public class homeActivity extends AppCompatActivity implements OnMapReadyCallback {
+import java.util.EventListener;
+
+public class homeActivity extends AppCompatActivity implements EventListener,OnMapReadyCallback {
     private Button startRunning, steps;
 
     private TextView Pulse, Longitude,Latitude,Altitude, Date, Time;
 
     private DatabaseReference databaseGPSReference, databasePulseReference;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+//        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+//        mapFragment.getMapAsync(this);
 
         setupUI();
         onClickListeners();
@@ -51,7 +55,7 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
         steps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(StepsActivity.class);
+                startActivity(WelcomePage.class);
             }
         });
 
@@ -60,6 +64,7 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
         Intent intent = new Intent(this, destinationActivity);
         startActivity(intent);
     }
+
     private void setupUI() {
         startRunning = findViewById(R.id.startRunningButtonID);
         steps = findViewById(R.id.StepsButton);
@@ -81,6 +86,7 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Pulse.setText(output);
                 }
             }
+
         });
 
         databaseGPSReference = FirebaseDatabase.getInstance().getReference("GPSData/");
@@ -125,17 +131,19 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        databaseGPSReference.child("Time").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+        databaseGPSReference.child("Time").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String output = "Time : " + dataSnapshot.getValue().toString();
-                    Time.setText(output);
-                }
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        String output = snapshot.getValue().toString();
+                        Time.setText(output);
             }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
 
     }
+
+
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
