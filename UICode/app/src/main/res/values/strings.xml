@@ -19,9 +19,8 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="title_activity_maps">MapsActivity</string>
-    <string name="get_started">Get Started</string>
-    <string name="surname">Surname</string>
-    <string name="email">Email</string>
-    <string name="name">Name</string>
-    <string name="password">Password</string>
+
+    <string name="option_get_place">Get place</string>
+    <string name="maps_api_key">AIzaSyCi1jndEzvVJXbapYKViTyRttrzO8cSFjk</string>
+
 </resources>

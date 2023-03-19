@@ -112,4 +112,5 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:layout="@android:layout/simple_gallery_item"
         android:layout_margin="20dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

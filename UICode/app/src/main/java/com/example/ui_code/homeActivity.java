@@ -2,14 +2,42 @@ package com.example.ui_code;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Canvas;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 
+import com.android.volley.BuildConfig;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,12 +52,21 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.core.EventTarget;
 
 import java.util.EventListener;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class homeActivity extends AppCompatActivity implements EventListener,OnMapReadyCallback {
+public class homeActivity extends AppCompatActivity implements EventListener, OnMapReadyCallback {
     private Button startRunning, steps;
 
     private TextView Pulse, Longitude,Latitude,Altitude, Date, Time, Step;
 
+    private static final String TAG = homeActivity.class.getSimpleName();
+    private GoogleMap map;
+
+    public double locationLatitude;
+    public double locationLongitude;
     private DatabaseReference databaseGPSReference, databasePulseReference, databaseStepReference;
 
     @Override
@@ -108,6 +145,8 @@ public class homeActivity extends AppCompatActivity implements EventListener,OnM
                 if (dataSnapshot.exists()) {
                     String output = "Latitude : " + dataSnapshot.getValue().toString();
                     Latitude.setText(output);
+                    String latitude = dataSnapshot.getValue().toString();
+                    locationLatitude = Double.parseDouble(latitude);
                 }
             }
         });
@@ -118,6 +157,8 @@ public class homeActivity extends AppCompatActivity implements EventListener,OnM
                 if (dataSnapshot.exists()) {
                     String output = "Longitude : " + dataSnapshot.getValue().toString();
                     Longitude.setText(output);
+                    String longitude = dataSnapshot.getValue().toString();
+                    locationLatitude = Double.parseDouble(longitude);
                 }
             }
         });
@@ -151,13 +192,39 @@ public class homeActivity extends AppCompatActivity implements EventListener,OnM
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
         });
-
+    }
+    //this function creates the map and the current location marker
+    @Override
+    public void onMapReady(@NonNull GoogleMap map) {
+        this.map = map;
+        map.addMarker(new MarkerOptions().position(new LatLng(45, -75)).title("Random").icon(BitmapFromVector(getApplicationContext(), R.drawable.baseline_circle_24)));
+        LatLng here = new LatLng(locationLatitude,locationLongitude);
+        map.addMarker(new MarkerOptions().position(here).title("Marker").icon(BitmapFromVector(getApplicationContext(), R.drawable.baseline_circle_24)));
+        moveToCurrentLocation(here);
     }
 
+    //this function creates a custom marker
+    private BitmapDescriptor BitmapFromVector(Context context, int vectorResId) {
+        // below line is use to generate a drawable.
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        // below line is use to set bounds to our vector drawable.
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        // below line is use to create a bitmap for our
+        // drawable which we have added.
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        // below line is use to add bitmap in our canvas.
+        Canvas canvas = new Canvas(bitmap);
+        // below line is use to draw our
+        // vector drawable in canvas.
+        vectorDrawable.draw(canvas);
+        // after generating our bitmap we are returning our bitmap.
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
 
-
-    @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        googleMap.addMarker(new MarkerOptions().position(new LatLng(0,0)).title("Marker"));
+    //this function zooms to current location
+    private void moveToCurrentLocation(LatLng currentLocation) {
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+        map.animateCamera(CameraUpdateFactory.zoomIn());
+        map.animateCamera(CameraUpdateFactory.zoomTo(5), 2000, null);
     }
 }
