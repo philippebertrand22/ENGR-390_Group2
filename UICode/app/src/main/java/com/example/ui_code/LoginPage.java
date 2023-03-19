@@ -87,8 +87,8 @@ public class LoginPage extends AppCompatActivity {
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                  if(task.isSuccessful()){
                                      FirebaseUser user = mAuth.getCurrentUser();
-                                     System.out.println("Email" + user.getEmail());
-                                     System.out.println("Email" + user.getUid());
+                                     System.out.println("Email " + user.getEmail());
+                                     System.out.println("ID " + user.getUid());
                                      Toast.makeText(view.getContext(), "Login Success", Toast.LENGTH_SHORT).show();
                                      startActivity(homeActivity.class);
                                  }

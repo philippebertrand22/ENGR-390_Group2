@@ -39,6 +39,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/image" />
 
+
     <TextView
         android:id="@+id/textView4"
         android:layout_width="201dp"
@@ -55,7 +56,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.489" />
-
 
     <TextView
         android:id="@+id/textView3"
