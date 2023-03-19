@@ -6,17 +6,17 @@
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 
-//Firebase Libraries
+// Firebase Libraries
 #include <Firebase_ESP_Client.h>
 #include "addons/TokenHelper.h"
 #include "addons/RTDBHelper.h"
 
 // Wifi Information
-#define WIFI_SSID "Helix.B590" // Wifi Name
-#define WIFI_PASSWORD "11111111"   // Wifi Password
+#define WIFI_SSID "Helix.B590"   // Wifi Name
+#define WIFI_PASSWORD "11111111" // Wifi Password
 
 // Firebase Database API Key & URL
-#define API_KEY "AIzaSyCSK8XFtg3bPjTbOkvPT2JsBXwBTIRDWl8" // Firebase Project API Key
+#define API_KEY "AIzaSyCSK8XFtg3bPjTbOkvPT2JsBXwBTIRDWl8"                     // Firebase Project API Key
 #define DATABASE_URL "https://fitnessdata-6cc1e-default-rtdb.firebaseio.com/" // FireBase Database URL
 
 // GPIO PIN for the Pulse Heart Rate Sensor
@@ -26,11 +26,11 @@
 #define RX_GPIO_PIN 34
 #define TX_GPIO_PIN 35
 
-// // Using software serial to read GPS coordinates
-SoftwareSerial gpsSerial(RX_GPIO_PIN,TX_GPIO_PIN);
+// Using software serial to read GPS coordinates
+SoftwareSerial gpsSerial(RX_GPIO_PIN, TX_GPIO_PIN);
 
-// // TinyGPS object for the GPS sensor
-TinyGPSPlus gps; 
+// TinyGPS object for the GPS sensor
+TinyGPSPlus gps;
 
 // Specifying the GPS Baud Rate for the software serial
 static const uint32_t GPSBaud = 9600;
@@ -46,10 +46,19 @@ FirebaseData fbdo;
 // Firebase Authentication - Anonynous User was defined for now
 FirebaseAuth auth;
 
-// Firebase Configuration to specify URL and API Key 
+// Firebase Configuration to specify URL and API Key
 FirebaseConfig config;
 
 bool signupisOk = false;
+
+float accelX = 1; 
+float accelY = 1;
+float accelZ = 1;
+
+int steps = 0;
+bool step_toggle = true;
+
+
 
 void setup() {
   Serial.begin(115200);
@@ -70,7 +79,11 @@ void setup() {
   Serial.println();
 
   Wire.begin(); // Using Wire for the Accelerometer conncetions
+  
+  imu.settings.gyro.enabled = false; //We don't need gyroscope or mag sensor
+  imu.settings.mag.enabled = false;
   imu.begin(); 
+
 
   config.api_key = API_KEY;
   config.database_url = DATABASE_URL;
@@ -96,7 +109,8 @@ void loop(){
       // displayPulse();
       writeGPSDatatoFirebase();
       writePulseSensorDatatoFirebase();
-      writeAccelerometerDatatoFirebase();
+      stepCount();
+
       Serial.println("DATA SUCCESSFULY STORED IN JSON FILE");
       delay(100);
       } else {
@@ -140,37 +154,21 @@ void writeGPSDatatoFirebase(){
      Firebase.RTDB.setString(&fbdo, "GPSData/Time", time);
 }
 
-void writeAccelerometerDatatoFirebase(){
-        // Start Reading Data from the LSM9DS1 sensor   
-        imu.readAccel();
-        imu.readGyro();
-        imu.readMag();
-
-       // Get the Accelerometer sensor data 
-        float accelX = imu.ax;
-        float accelY = imu.ay;
-        float accelZ = imu.az;                     
-  
-        float gyroX = imu.gx;
-        float gyroY = imu.gy;
-        float gyroZ = imu.gz;
-  
-        float magX = imu.mx;
-        float magY = imu.my;
-        float magZ = imu.mz;
+void writeAccelerometerDatatoFirebase(float* filter){
 
         Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/x", accelX);
         Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/y", accelY);
         Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/z", accelZ);
 
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Gyroscope/x", gyroX);
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Gyroscope/y", gyroY);
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Gyroscope/z", gyroZ);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter0", filter[0]);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter1", filter[1]);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter2", filter[2]);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter3", filter[3]);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter4", filter[4]);
 
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Mag/x", magX);
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Mag/y", magY);
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Mag/z", magZ);
-        
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Step", steps);
+
+
         delay(10);
 }
 
@@ -213,30 +211,7 @@ void displayAccelInfo() {
   Serial.print(accelZ);
   Serial.print("||");
 
-  Serial.println();
-  Serial.println("Gyroscope:");
-  Serial.print("X: ");
-  Serial.print(gyroX);
-  Serial.print("||");
-  Serial.print("Y: ");
-  Serial.print(gyroY);
-  Serial.print("||");
-  Serial.print("Z: ");
-  Serial.print(gyroZ);
-  Serial.print("||");
-
-  Serial.println(); 
-  Serial.println("Magnitude:");
-  Serial.print("X: ");
-  Serial.print(magX);
-  Serial.print("||");
-  Serial.print("Y: ");
-  Serial.print(magY);
-  Serial.print("||");
-  Serial.print("Z: ");
-  Serial.print(magZ);
-  Serial.print("||");
-  Serial.println(); 
+ 
 }
 
 void displayGPSInfo()
