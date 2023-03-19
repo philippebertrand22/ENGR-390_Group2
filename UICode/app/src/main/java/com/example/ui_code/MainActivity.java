@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView stopButton, playButton, pauseButton;
 
-    private TextView timeValue, timeText, distanceValue, distanceText, speedValue, speedText, BPMValue, BPMText;
+    private TextView timeValue, timeText, distanceValue, distanceText, speedValue, speedText, BPMValue, BPMText, stepText, stepValue;
 
     boolean timerStarted = false;
 
@@ -74,34 +74,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onClickListeners() {
+
+        // add here whatever happens when you click the stop button
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //add here whatever happens when you click the stop button
+
                 timeValue.setText(formatTime(0,0,0));
 
                 startActivity(summaryActivity.class);
             }
         });
 
+        // add here whatever happens when you click the pause button
         pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 pauseButton.setVisibility(View.GONE);
                 stopButton.setVisibility(View.VISIBLE);
                 playButton.setVisibility(View.VISIBLE);
-                //add here whatever happens when you click the pause button
                 startTimer();
             }
         });
 
+        // add here whatever happens when you click the play button
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 stopButton.setVisibility(View.GONE);
                 playButton.setVisibility(View.GONE);
                 pauseButton.setVisibility(View.VISIBLE);
-                //add here whatever happens when you click the play button
+
                 startTimer();
             }
         });
@@ -125,6 +128,8 @@ public class MainActivity extends AppCompatActivity {
         speedText = findViewById(R.id.speedTextID);
         BPMValue = findViewById(R.id.BPMValueID);
         BPMText = findViewById(R.id.BPMTextID);
+        stepText = findViewById(R.id.stepTextID);
+        stepValue = findViewById(R.id.stepValueID);
     }
 
 }

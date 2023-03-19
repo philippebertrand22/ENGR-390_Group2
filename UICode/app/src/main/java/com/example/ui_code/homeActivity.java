@@ -28,9 +28,9 @@ import java.util.EventListener;
 public class homeActivity extends AppCompatActivity implements EventListener,OnMapReadyCallback {
     private Button startRunning, steps;
 
-    private TextView Pulse, Longitude,Latitude,Altitude, Date, Time;
+    private TextView Pulse, Longitude,Latitude,Altitude, Date, Time, Step;
 
-    private DatabaseReference databaseGPSReference, databasePulseReference;
+    private DatabaseReference databaseGPSReference, databasePulseReference, databaseStepReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,13 +68,13 @@ public class homeActivity extends AppCompatActivity implements EventListener,OnM
     private void setupUI() {
         startRunning = findViewById(R.id.startRunningButtonID);
         steps = findViewById(R.id.StepsButton);
-
         Pulse = findViewById(R.id.Pulse);
         Longitude = findViewById(R.id.latitude);
         Latitude = findViewById(R.id.longitude);
         Altitude = findViewById(R.id.altitude);
         Date = findViewById(R.id.date);
         Time = findViewById(R.id.time);
+        Step = findViewById(R.id.step);
 
         databasePulseReference = FirebaseDatabase.getInstance().getReference("Pulse Sensor/");
 
@@ -84,6 +84,18 @@ public class homeActivity extends AppCompatActivity implements EventListener,OnM
                 if (dataSnapshot.exists()) {
                     String output = "Pulse detected : " + dataSnapshot.getValue().toString();
                     Pulse.setText(output);
+                }
+            }
+        });
+
+        databaseStepReference = FirebaseDatabase.getInstance().getReference("AccelerometerData/Acceleration/");
+
+        databaseStepReference.child("Step").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String output = "Step : " + dataSnapshot.getValue().toString();
+                    Step.setText(output);
                 }
             }
         });
