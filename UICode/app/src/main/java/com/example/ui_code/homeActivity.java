@@ -55,7 +55,7 @@ public class homeActivity extends AppCompatActivity implements EventListener,OnM
         steps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(WelcomePage.class);
+                startActivity(StepsActivity.class);
             }
         });
 
@@ -86,7 +86,6 @@ public class homeActivity extends AppCompatActivity implements EventListener,OnM
                     Pulse.setText(output);
                 }
             }
-
         });
 
         databaseGPSReference = FirebaseDatabase.getInstance().getReference("GPSData/");
