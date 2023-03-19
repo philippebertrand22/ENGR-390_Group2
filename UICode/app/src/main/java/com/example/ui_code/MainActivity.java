@@ -1,5 +1,6 @@
 package com.example.ui_code;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -7,6 +8,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -16,6 +26,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageView stopButton, playButton, pauseButton;
 
     private TextView timeValue, timeText, distanceValue, distanceText, speedValue, speedText, BPMValue, BPMText, stepText, stepValue;
+
+    private FirebaseAuth mAuth;
+
+    private FirebaseUser user;
+
+    private DatabaseReference databaseGPSReference, databasePulseReference, databaseStepReference;
 
     boolean timerStarted = false;
 
@@ -34,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         stopButton.setVisibility(View.GONE);
         playButton.setVisibility(View.GONE);
         startTimer();
+        getData();
     }
 
     private void startTimer() {
@@ -116,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private float step, longitude, latitude, altitude, date;
+
     private void setupUI() {
         stopButton = findViewById(R.id.stopButtonID);
         playButton = findViewById(R.id.playButtonID);
@@ -130,6 +149,86 @@ public class MainActivity extends AppCompatActivity {
         BPMText = findViewById(R.id.BPMTextID);
         stepText = findViewById(R.id.stepTextID);
         stepValue = findViewById(R.id.stepValueID);
+
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser(); // Use this to get any user info from the database
+
+        databasePulseReference = FirebaseDatabase.getInstance().getReference("Pulse Sensor/");
+        databaseStepReference = FirebaseDatabase.getInstance().getReference("AccelerometerData/Acceleration/");
+        databaseGPSReference = FirebaseDatabase.getInstance().getReference("GPSData/");
+    }
+
+    private void getData(){
+
+        databasePulseReference.child("State").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String output = dataSnapshot.getValue().toString();
+                    BPMValue.setText(output);
+                }
+            }
+        });
+
+        databaseStepReference.child("Step").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String output = dataSnapshot.getValue().toString();
+                    stepValue.setText(output);
+                }
+            }
+        });
+
+        databaseGPSReference.child("Latitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String output = "Latitude : " + dataSnapshot.getValue().toString();
+                    // latitudeValue.setText(output);
+                }
+            }
+        });
+
+        databaseGPSReference.child("Longitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String output = "Longitude : " + dataSnapshot.getValue().toString();
+                    //Longitude.setText(output);
+                }
+            }
+        });
+
+        databaseGPSReference.child("Altitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String output = "Altitude : " + dataSnapshot.getValue().toString();
+                    //Altitude.setText(output);
+                }
+            }
+        });
+
+        databaseGPSReference.child("Date").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String output = dataSnapshot.getValue().toString();
+                    //dateValue.setText(output);
+                }
+            }
+        });
+
+        databaseGPSReference.child("Time").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String output = "Date : " + snapshot.getValue().toString();
+                //Time.setText(output);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 
 }
