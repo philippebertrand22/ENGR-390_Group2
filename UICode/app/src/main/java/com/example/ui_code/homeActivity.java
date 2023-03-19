@@ -62,14 +62,8 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String TAG = homeActivity.class.getSimpleName();
     private GoogleMap map;
 
-    double locationLatitude;
-    double locationLongitude;
-
-    Timer timer;
-
-    TimerTask timerTask;
-
-    Double time = 0.0;
+    public double locationLatitude;
+    public double locationLongitude;
 
 
     @Override
@@ -184,14 +178,17 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    //this function creates the map and the current location marker
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
-        map.addMarker(new MarkerOptions().position(new LatLng(-15, 30)).title("Random"));
+        map.addMarker(new MarkerOptions().position(new LatLng(45, -75)).title("Random").icon(BitmapFromVector(getApplicationContext(), R.drawable.baseline_circle_24)));
         LatLng here = new LatLng(locationLatitude,locationLongitude);
         map.addMarker(new MarkerOptions().position(here).title("Marker").icon(BitmapFromVector(getApplicationContext(), R.drawable.baseline_circle_24)));
         moveToCurrentLocation(here);
     }
+
+    //this function creates a custom marker
     private BitmapDescriptor BitmapFromVector(Context context, int vectorResId) {
         // below line is use to generate a drawable.
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
@@ -208,6 +205,8 @@ public class homeActivity extends AppCompatActivity implements OnMapReadyCallbac
         // after generating our bitmap we are returning our bitmap.
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
+
+    //this function zooms to current location
     private void moveToCurrentLocation(LatLng currentLocation) {
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
         map.animateCamera(CameraUpdateFactory.zoomIn());

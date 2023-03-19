@@ -8,6 +8,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,17 +30,25 @@ public class MainActivity extends AppCompatActivity {
     TimerTask timerTask;
     Double time = 0.0;
 
+    public ArrayList<LatLng> markers;
+
+    homeActivity home = new homeActivity();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        markers = new ArrayList<>();
         timer = new Timer();
         setupUI();
         onClickListeners();
         stopButton.setVisibility(View.GONE);
         playButton.setVisibility(View.GONE);
         startTimer();
+
+
     }
 
     private void startTimer() {
@@ -46,7 +61,13 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 time++;
+                                //this shows the timer time
                                 timeValue.setText(getTimerText());
+
+                                //add a marker in the list
+                                if(time%5 == 0){
+                                    markers.add(new LatLng(home.locationLatitude, home.locationLongitude));
+                                }
                             }
                         });
                     }
@@ -127,4 +148,7 @@ public class MainActivity extends AppCompatActivity {
         BPMText = findViewById(R.id.BPMTextID);
     }
 
+    public List<LatLng> getList(){
+        return markers;
+    }
 }
