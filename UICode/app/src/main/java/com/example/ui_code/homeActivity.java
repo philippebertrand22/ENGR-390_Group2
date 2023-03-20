@@ -52,7 +52,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class homeActivity extends AppCompatActivity implements EventListener, OnMapReadyCallback {
-    private Button startRunning, steps;
+    private Button startRunning, steps,logout,graph;
     private TextView Pulse, Longitude,Latitude,Altitude, Date, Time, Step;
 
     private static final String TAG = homeActivity.class.getSimpleName();
@@ -97,6 +97,20 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
             }
         });
 
+        graph.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(GraphPage.class);
+            }
+        });
+
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(LoginPage.class);
+            }
+        });
+
     }
     private void startActivity(Class<?> destinationActivity) {
         Intent intent = new Intent(this, destinationActivity);
@@ -105,6 +119,8 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
 
     private void setupUI() {
         startRunning = findViewById(R.id.startRunningButtonID);
+        graph = findViewById(R.id.graph_btn);
+        logout = findViewById(R.id.logout);
         steps = findViewById(R.id.StepsButton);
         Pulse = findViewById(R.id.Pulse);
         Longitude = findViewById(R.id.latitude);
