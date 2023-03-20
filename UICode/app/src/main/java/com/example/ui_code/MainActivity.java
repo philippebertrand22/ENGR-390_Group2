@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,22 +41,19 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseUser user;
 
-    private DatabaseReference databaseGPSReference, databasePulseReference, databaseStepReference, databaseUserReference, latestActivity, currentActivity;
+    private DatabaseReference databaseGPSReference, databasePulseReference, databaseStepReference, databaseUserReference, currentActivity;
 
     boolean timerStarted = false;
 
     private long step, bpm, longitude, latitude, altitude;
     private String date, currentTime, currentActivityTime, userKey;
 
-
     Timer timer;
     TimerTask timerTask;
     Double time = 0.0;
 
     public ArrayList<LatLng> markers;
-
     homeActivity home = new homeActivity();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
         stopButton.setVisibility(View.GONE);
         playButton.setVisibility(View.GONE);
         startTimer();
-
     }
 
     private void startTimer() {
@@ -92,9 +89,8 @@ public class MainActivity extends AppCompatActivity {
                                     markers.add(new LatLng(home.locationLatitude, home.locationLongitude));
                                 }
 
-                                // Sends to database
-                                getData();
-                                //sendData();
+                                // Adds sensor values as new entry in database
+                                addNewEntry(currentActivity, getData());
                             }
                         });
                     }
@@ -105,6 +101,11 @@ public class MainActivity extends AppCompatActivity {
                 timerStarted = false;
                 timerTask.cancel();
             }
+    }
+
+    private void stopTimer(){
+        timerStarted = false;
+        timerTask.cancel();
     }
 
     private String getTimerText() {
@@ -128,8 +129,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                stopTimer();
                 timeValue.setText(formatTime(0,0,0));
-
                 startActivity(summaryActivity.class);
             }
         });
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 pauseButton.setVisibility(View.GONE);
                 stopButton.setVisibility(View.VISIBLE);
                 playButton.setVisibility(View.VISIBLE);
-                startTimer();
+                stopTimer();
             }
         });
 
@@ -181,38 +182,90 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
-        userKey = user.getUid();
+        userKey = user.getUid(); // Userkey is unique to whoever logged in
 
 
         databasePulseReference = FirebaseDatabase.getInstance().getReference("Pulse Sensor/");
         databaseStepReference = FirebaseDatabase.getInstance().getReference("AccelerometerData/Acceleration/");
         databaseGPSReference = FirebaseDatabase.getInstance().getReference("GPSData/");
-        databaseUserReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activity");
+        databaseUserReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities");
 
 
-        // Get the latest node ID
-        databaseUserReference.child("node_count").get().addOnCompleteListener(task -> {
-        if (task.isSuccessful()){
-        Long latestNodeId=task.getResult().getValue(Long.class);
-
-        // Check if the latest node ID exists
-        if(latestNodeId==null){
-        // If it doesn't, start at 1
-        latestNodeId=1L;
-        }else{
-        // If it does, increment it
-        latestNodeId++;
-        }
-
-        // Update the node count to reflect the new node
-        databaseUserReference.child("node_count").setValue(latestNodeId);
-
-        // Set the new node with the latest ID as the key
-        latestActivity = databaseUserReference.child("Activity_" + String.valueOf(latestNodeId));
-        latestActivity.child("Run").setValue(" Records");
-        }
+        createNewFolder(databaseUserReference, new OnNewFolderCreatedListener() {
+            @Override
+            public void onNewFolderCreated(DatabaseReference newFolder) {
+                // Save the new folder reference as a global variable
+                currentActivity = newFolder;
+            }
         });
 
+    }
+
+    private void createNewFolder(DatabaseReference rootRef, OnNewFolderCreatedListener listener) {
+        // Get the latest activity count
+        rootRef.child("activity_count").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Long latestNodeId = task.getResult().getValue(Long.class);
+
+                // Check if the latest node ID exists
+                if (latestNodeId == null) {
+                    // If it doesn't, start at 1
+                    latestNodeId = 1L;
+                } else {
+                    // If it does, increment it
+                    latestNodeId++;
+                }
+
+                // Create new folder with latest ID in the key
+                DatabaseReference newFolder = rootRef.child("Activity_" + String.valueOf(latestNodeId));
+
+                // Update the activity count with incremented value
+                rootRef.child("activity_count").setValue(latestNodeId).addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        // Return the new folder reference to the listener
+                        // Needed to implement a listener because I was getting some Lambda and reference errors otherwise
+                        listener.onNewFolderCreated(newFolder);
+                    }
+                });
+            }
+        });
+    }
+
+    private void addNewEntry(DatabaseReference rootRef, String message) {
+        if (rootRef != null) {
+
+            // Get latest entry_count
+            rootRef.child("entry_count").get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Long latestNodeId = task.getResult().getValue(Long.class);
+
+                    // Check if there is an entry
+                    if (latestNodeId == null) {
+                        // If it doesn't, start at 1
+                        latestNodeId = 1L;
+                    } else {
+                        // If it does, increment it
+                        latestNodeId++;
+                    }
+                    if (latestNodeId >= 50) {
+                        //Limit the amount of entries for the time being
+                        stopTimer(); // Stops the timer and hence the queries
+                    }
+
+                    // Set the new entry with the latest ID as the key
+                    rootRef.child(String.valueOf(latestNodeId)).setValue(message);
+
+                    // Update the entry count to reflect the new node
+                    rootRef.child("entry_count").setValue(latestNodeId);
+                }
+            });
+        }
+
+
+    }
+
+    private interface OnNewFolderCreatedListener {
+        void onNewFolderCreated(DatabaseReference newFolder);
     }
 
     private String getData(){
@@ -289,42 +342,34 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {}
         });
 
-        return(date + "|" + currentTime + "|" + currentActivityTime + "|" + bpm + "|" + step + "|" + latitude + "|" + longitude + "|" + altitude);
-    }
-
-    private void sendData(){
-
-        // Get the latest node ID
-        latestActivity.child("number_of_entries").get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                Long latestEntryId=task.getResult().getValue(Long.class);
-
-                // Check if the latest node ID exists
-                if(latestEntryId==null){
-                    // If it doesn't, start at 1
-                    latestEntryId=1L;
-                }else{
-                    // If it does, increment it
-                    latestEntryId++;
-                }
-
-                // Update the node count to reflect the new node
-                latestActivity.child("number_of_entries").setValue(latestEntryId);
-
-
-                // Set the new node with the latest ID as the key
-                currentActivity = latestActivity.child(String.valueOf(latestEntryId));
-
-                // Store the string array in the new node
-                currentActivity.setValue("Test");
-            }
-        });
-
-
-
+        return("Date: " + date + " | Time: " + currentTime + " | Running Time: " + currentActivityTime + " | HeartBeat: " + bpm + " | Steps: " + step + " | Latitude: " + latitude + " | Longitude: " + longitude + " | Altitude: " + altitude);
     }
 
     public List<LatLng> getList(){
         return markers;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Check if the user clicked the back button in the top left corner
+        if (item.getItemId() == android.R.id.home) {
+
+            //Stops the timer to ensure the database does not keep getting filled
+           stopTimer();
+            // Return home
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Do something when the user clicks the back button on the bottom left
+        //Stops the timer to ensure the database does not keep getting filled
+        stopTimer();
+        // Return home
+        finish();
+    }
+
 }
