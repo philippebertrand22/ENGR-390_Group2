@@ -55,6 +55,13 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList<LatLng> markers;
     homeActivity home = new homeActivity();
 
+    /*
+    How the activity logs work:
+    Gets a reference to the user's folder using user.getuid()
+    Creates a new folder with a number based on a "activity_count" in database (only once)
+    Through startTimer(), calls addNewEntry() to add sensor values in database. Called every second
+     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
