@@ -53,7 +53,6 @@ import java.util.TimerTask;
 
 public class homeActivity extends AppCompatActivity implements EventListener, OnMapReadyCallback {
     private Button startRunning, steps;
-
     private TextView Pulse, Longitude,Latitude,Altitude, Date, Time, Step;
 
     private static final String TAG = homeActivity.class.getSimpleName();
@@ -72,8 +71,8 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-//        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-//        mapFragment.getMapAsync(this);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         setupUI();
         onClickListeners();
