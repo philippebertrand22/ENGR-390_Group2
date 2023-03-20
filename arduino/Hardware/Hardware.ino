@@ -246,7 +246,6 @@ void stepCount(){
   If threshold is met, increment step
   */
 
-  int sampleSize = 5; //Can change the sample size and delays to improve the algorithm
   int sampleSize = 50; //Can change the sample size and delays to improve the algorithm
   float accel[sampleSize][3];
   float accel_along_gravity[sampleSize][3];
