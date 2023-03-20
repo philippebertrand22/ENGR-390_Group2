@@ -166,7 +166,7 @@ void loop(){
       displayPulse(bpm);    
 
       writeGPSDatatoFirebase();
-      writePulseSensorDatatoFirebase();
+      writePulseSensorDatatoFirebase(bpm);
       stepCount();
 
       Serial.println("DATA SUCCESSFULY STORED IN JSON FILE");
@@ -353,7 +353,7 @@ Serial.print(
   String(dot_product[4]));
 
 
-Serial.println("Filtered Acceleration pointing down");
+Serial.println("\nFiltered Acceleration pointing down");
 Serial.print(
   String(filtered_accel[0]) + ", " +
   String(filtered_accel[1]) + ", " +
@@ -362,104 +362,6 @@ Serial.print(
   String(filtered_accel[4]));
 }
 
-// void displayPulse(){
-//   int irValue = digitalRead(IR_SENSOR_PIN); // Read the IR sensor value
-//   Serial.print("Pulse detected:"); 
-//   Serial.println(irValue); // Print the value to the serial monitor either HIGH or LOW
-//   delay(1000);
-// }
-
-     imu.readAccel();
-
-    accel[i][0] = accelX = imu.ax;  
-    accel[i][1] = accelY = imu.ay;  
-    accel[i][2] = accelZ = imu.az + 1.0;  // Undoing the calibration in readAccel()
-
-    delay(10);
-  }
- 
-  // Infinite Impulse Response filter
-  // Filter out the gravitational acceleration and store it in new array
-  for (int i = 2; i < sampleSize ; i++){ 
-    for(int j = 0; j < 3; j++){ // Nested for loop for each axis
-  
-      accel_along_gravity[i][j] = 
-      accel[i][j]                    * coefficients_low_pass_0Hz[0] +
-      accel[i-1][j]                  * coefficients_low_pass_0Hz[1] +
-      accel[i-2][j]                  * coefficients_low_pass_0Hz[2] -
-      accel_along_gravity[i-1][j]    * coefficients_low_pass_0Hz[3] -
-      accel_along_gravity[i-2][j]    * coefficients_low_pass_0Hz[4];
-      }
-  }
-
-  // Subtract gravity from raw acceleration to get user acceleration
-  for (int i = 2; i < sampleSize ; i++){ 
-    for(int j = 0; j < 3; j++){
-      accel[i][j] -= accel_along_gravity[i][j];     
-    }
-  }
-
-  // Dot product between accel and grav-accel to get a single value that is along the gravitaional axis regardless of the sensor's orientation
-  for (int i = 0; i < sampleSize ; i++)
-    {         
-      dot_product[i] =  
-      accel[i][0] * accel_along_gravity[i][0] + 
-      accel[i][1] * accel_along_gravity[i][1] + 
-      accel[i][2] * accel_along_gravity[i][2];
-    }
-    
-  // Filter low pass below 5Hz
-  for (int i = 2; i < sampleSize ; i++){
-    filtered_accel_low_pass[i] = (
-      dot_product[i]                  * coefficients_low_pass_5Hz[0] +
-      dot_product[i-1]                * coefficients_low_pass_5Hz[1] +
-      dot_product[i-2]                * coefficients_low_pass_5Hz[2] -
-      filtered_accel_low_pass[i-1]    * coefficients_low_pass_5Hz[3] -
-      filtered_accel_low_pass[i-2]    * coefficients_low_pass_5Hz[4]
-      );}
-
-  // Second Filter now high pass above 1Hz
-  for (int i = 2; i < sampleSize ; i++){
-    filtered_accel[i] = (
-      filtered_accel_low_pass[i]      * coefficients_high_pass_1Hz[0] +
-      filtered_accel_low_pass[i-1]    * coefficients_high_pass_1Hz[1] +
-      filtered_accel_low_pass[i-2]    * coefficients_high_pass_1Hz[2] -
-      filtered_accel[i-1]             * coefficients_high_pass_1Hz[3] -
-      filtered_accel[i-2]             * coefficients_high_pass_1Hz[4]
-      );}
-
-  // Count steps
-  for (int i = 1; i < sampleSize; i++){
-
-  // Only increments if crossing the threshold in the positive direction
-  if ((filtered_accel[i] >= threshold) && (filtered_accel[i-1] < threshold) && (step_toggle == true) ){
-    steps++;
-    step_toggle = false;
-  }
-
-  // Can only reset the toggle if the acceleration crossed the 0 in the negative direction
-  if ((filtered_accel[i] < 0) && (filtered_accel[i-1] >=0)) step_toggle = true;
-  }
-
-  writeAccelerometerDatatoFirebase(filtered_accel);
-
-Serial.println("Raw Acceleration pointing down");
-Serial.print(
-  String(dot_product[0]) + ", " +
-  String(dot_product[1]) + ", " +
-  String(dot_product[2]) + ", " +
-  String(dot_product[3]) + ", " +
-  String(dot_product[4]));
-
-
-Serial.println("Filtered Acceleration pointing down");
-Serial.print(
-  String(filtered_accel[0]) + ", " +
-  String(filtered_accel[1]) + ", " +
-  String(filtered_accel[2]) + ", " +
-  String(filtered_accel[3]) + ", " +
-  String(filtered_accel[4]));
-}
 
 int getPulse(){
 
@@ -488,31 +390,6 @@ void displayAccelInfo() {
   Serial.print("Z: ");
   Serial.print(accelZ);
   Serial.print("||");
-
-  Serial.println();
-  Serial.println("Gyroscope:");
-  Serial.print("X: ");
-  Serial.print(gyroX);
-  Serial.print("||");
-  Serial.print("Y: ");
-  Serial.print(gyroY);
-  Serial.print("||");
-  Serial.print("Z: ");
-  Serial.print(gyroZ);
-  Serial.print("||");
-
-  Serial.println(); 
-  Serial.println("Magnitude:");
-  Serial.print("X: ");
-  Serial.print(magX);
-  Serial.print("||");
-  Serial.print("Y: ");
-  Serial.print(magY);
-  Serial.print("||");
-  Serial.print("Z: ");
-  Serial.print(magZ);
-  Serial.print("||");
-  Serial.println(); 
 }
 
 void displayGPSInfo()
