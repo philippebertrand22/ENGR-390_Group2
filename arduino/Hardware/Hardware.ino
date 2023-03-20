@@ -61,7 +61,7 @@ https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32
 #define DATABASE_URL "https://fitnessdata-6cc1e-default-rtdb.firebaseio.com/" // FireBase Database URL
 
 // GPIO PIN for the Pulse Heart Rate Sensor
-#define IR_SENSOR_GPIO_Input_PIN 13
+#define PULSE_PIN 13
 
 // GPIO Pins for the NEO-7M GPS Module
 #define RX_GPIO_PIN 34
@@ -76,8 +76,6 @@ TinyGPSPlus gps;
 // Specifying the GPS Baud Rate for the software serial
 static const uint32_t GPSBaud = 9600;
 
-unsigned long sendDataPrevMillis = 0;
-
 // SparkFunk LSM9DS1 Accelerometer object
 LSM9DS1 imu;
 
@@ -90,18 +88,26 @@ FirebaseAuth auth;
 // Firebase Configuration to specify URL and API Key
 FirebaseConfig config;
 
+// PulseSensor object
+PulseSensorPlayground pulseSensor;
+
+// Variables
 bool signupisOk = false;
+
+unsigned long sendDataPrevMillis = 0;
 
 float accelX = 1;
 float accelY = 1;
 float accelZ = 1;
-
 float accelgravityX;
 float accelgravityY;
 float accelgravityZ;
 
 int steps = 0;
 bool step_toggle = true;
+int PulseThreshold = 550;
+
+
 
 
 
@@ -110,7 +116,10 @@ void setup() {
 
   gpsSerial.begin(GPSBaud); // Software serial initialisation
 
-  pinMode(IR_SENSOR_GPIO_Input_PIN, INPUT); // Reading Input from IR_Sensor through GPIO 13
+  // Configure the PulseSensor
+  pinMode(PULSE_PIN, INPUT); // Reading Input from IR_Sensor through GPIO 13
+  pulseSensor.analogInput(PULSE_PIN); // Set which pin is the analog input (default 0)
+  pulseSensor.setThreshold(PulseThreshold);
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
@@ -149,9 +158,13 @@ void loop(){
  while (gpsSerial.available() > 0) 
    if(gps.encode(gpsSerial.read())){
     if(Firebase.ready() && signupisOk && (millis() - sendDataPrevMillis > 5000 || sendDataPrevMillis == 0) ){
+      stepCount();
+      int bpm = getPulse();
+
       displayAccelInfo();
-      // displayGPSInfo();
-      // displayPulse();
+    //displayGPSInfo();
+      displayPulse(bpm);    
+
       writeGPSDatatoFirebase();
       writePulseSensorDatatoFirebase();
       stepCount();
@@ -166,10 +179,8 @@ void loop(){
 
 }
 
-void writePulseSensorDatatoFirebase(){
-  int irValue = digitalRead(IR_SENSOR_GPIO_Input_PIN); // Read the IR sensor value HIGH or LOW
-  Firebase.RTDB.setInt(&fbdo, "Pulse Sensor/State", irValue);
-  delay(10);
+void writePulseSensorDatatoFirebase(int beats){  
+  Firebase.RTDB.setInt(&fbdo, "Pulse Sensor/State", beats);
 }
 
 void writeGPSDatatoFirebase(){
@@ -359,6 +370,112 @@ Serial.print(
 //   delay(1000);
 // }
 
+     imu.readAccel();
+
+    accel[i][0] = accelX = imu.ax;  
+    accel[i][1] = accelY = imu.ay;  
+    accel[i][2] = accelZ = imu.az + 1.0;  // Undoing the calibration in readAccel()
+
+    delay(10);
+  }
+ 
+  // Infinite Impulse Response filter
+  // Filter out the gravitational acceleration and store it in new array
+  for (int i = 2; i < sampleSize ; i++){ 
+    for(int j = 0; j < 3; j++){ // Nested for loop for each axis
+  
+      accel_along_gravity[i][j] = 
+      accel[i][j]                    * coefficients_low_pass_0Hz[0] +
+      accel[i-1][j]                  * coefficients_low_pass_0Hz[1] +
+      accel[i-2][j]                  * coefficients_low_pass_0Hz[2] -
+      accel_along_gravity[i-1][j]    * coefficients_low_pass_0Hz[3] -
+      accel_along_gravity[i-2][j]    * coefficients_low_pass_0Hz[4];
+      }
+  }
+
+  // Subtract gravity from raw acceleration to get user acceleration
+  for (int i = 2; i < sampleSize ; i++){ 
+    for(int j = 0; j < 3; j++){
+      accel[i][j] -= accel_along_gravity[i][j];     
+    }
+  }
+
+  // Dot product between accel and grav-accel to get a single value that is along the gravitaional axis regardless of the sensor's orientation
+  for (int i = 0; i < sampleSize ; i++)
+    {         
+      dot_product[i] =  
+      accel[i][0] * accel_along_gravity[i][0] + 
+      accel[i][1] * accel_along_gravity[i][1] + 
+      accel[i][2] * accel_along_gravity[i][2];
+    }
+    
+  // Filter low pass below 5Hz
+  for (int i = 2; i < sampleSize ; i++){
+    filtered_accel_low_pass[i] = (
+      dot_product[i]                  * coefficients_low_pass_5Hz[0] +
+      dot_product[i-1]                * coefficients_low_pass_5Hz[1] +
+      dot_product[i-2]                * coefficients_low_pass_5Hz[2] -
+      filtered_accel_low_pass[i-1]    * coefficients_low_pass_5Hz[3] -
+      filtered_accel_low_pass[i-2]    * coefficients_low_pass_5Hz[4]
+      );}
+
+  // Second Filter now high pass above 1Hz
+  for (int i = 2; i < sampleSize ; i++){
+    filtered_accel[i] = (
+      filtered_accel_low_pass[i]      * coefficients_high_pass_1Hz[0] +
+      filtered_accel_low_pass[i-1]    * coefficients_high_pass_1Hz[1] +
+      filtered_accel_low_pass[i-2]    * coefficients_high_pass_1Hz[2] -
+      filtered_accel[i-1]             * coefficients_high_pass_1Hz[3] -
+      filtered_accel[i-2]             * coefficients_high_pass_1Hz[4]
+      );}
+
+  // Count steps
+  for (int i = 1; i < sampleSize; i++){
+
+  // Only increments if crossing the threshold in the positive direction
+  if ((filtered_accel[i] >= threshold) && (filtered_accel[i-1] < threshold) && (step_toggle == true) ){
+    steps++;
+    step_toggle = false;
+  }
+
+  // Can only reset the toggle if the acceleration crossed the 0 in the negative direction
+  if ((filtered_accel[i] < 0) && (filtered_accel[i-1] >=0)) step_toggle = true;
+  }
+
+  writeAccelerometerDatatoFirebase(filtered_accel);
+
+Serial.println("Raw Acceleration pointing down");
+Serial.print(
+  String(dot_product[0]) + ", " +
+  String(dot_product[1]) + ", " +
+  String(dot_product[2]) + ", " +
+  String(dot_product[3]) + ", " +
+  String(dot_product[4]));
+
+
+Serial.println("Filtered Acceleration pointing down");
+Serial.print(
+  String(filtered_accel[0]) + ", " +
+  String(filtered_accel[1]) + ", " +
+  String(filtered_accel[2]) + ", " +
+  String(filtered_accel[3]) + ", " +
+  String(filtered_accel[4]));
+}
+
+int getPulse(){
+
+if (pulseSensor.sawStartOfBeat()) {           // Constantly test to see if "a beat happened".
+int myBPM = pulseSensor.getBeatsPerMinute();  // Calls function on our pulseSensor object that returns BPM as an "int".
+return myBPM;
+}
+
+}
+
+void displayPulse(int beats){
+  Serial.print("BPM: "); 
+  Serial.println(beats); // Print the value to the serial monitor either HIGH or LOW
+}
+
 void displayAccelInfo() {
  
   Serial.println();
@@ -373,7 +490,30 @@ void displayAccelInfo() {
   Serial.print(accelZ);
   Serial.print("||");
 
- 
+  Serial.println();
+  Serial.println("Gyroscope:");
+  Serial.print("X: ");
+  Serial.print(gyroX);
+  Serial.print("||");
+  Serial.print("Y: ");
+  Serial.print(gyroY);
+  Serial.print("||");
+  Serial.print("Z: ");
+  Serial.print(gyroZ);
+  Serial.print("||");
+
+  Serial.println(); 
+  Serial.println("Magnitude:");
+  Serial.print("X: ");
+  Serial.print(magX);
+  Serial.print("||");
+  Serial.print("Y: ");
+  Serial.print(magY);
+  Serial.print("||");
+  Serial.print("Z: ");
+  Serial.print(magZ);
+  Serial.print("||");
+  Serial.println(); 
 }
 
 void displayGPSInfo()
