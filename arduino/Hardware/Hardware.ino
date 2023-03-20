@@ -1,3 +1,44 @@
+/*
+Wiki:
+### If your computer does not recognize the esp32 when you plug it in
+
+**Install drivers**
+
+Check if: 
+Found in device manager/ports/Silicon Labs CP210x...
+
+Otherwise:
+device manager/right click on the device that wasn't recognized/update driver and manually direct it to the files I downloaded:
+https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=downloads
+
+### In Arduino IDE
+* File / Preferences
+* Additional boards manager URL
+
+And add
+```
+https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+```
+
+* Go to Tools > Board > Boards Manager
+* Search **esp32**
+* Install **esp32 by Espressif Systems**
+* Go to Tools > Board > esp32 > **ESP32-WROOM-DA Module**
+
+### Libraries
+
+1. Tools > Manage Libraries
+2. Search & install **sparkfun LSM9DS1**
+3. Search & install **TinyGPSPlus**
+4. Search & install **EspSoftwareSerial**
+5. Search & install **ESP32_Pinoo**
+6. Search & install **firebase arduino client library esp32**
+7. Search & install **PulseSensor**
+*/
+
+// Heartbeat Sensor Library
+#include <PulseSensorPlayground.h>
+
 // Accelerometer Libraries
 #include <Wire.h>
 #include <SparkFunLSM9DS1.h>
@@ -51,9 +92,13 @@ FirebaseConfig config;
 
 bool signupisOk = false;
 
-float accelX = 1; 
+float accelX = 1;
 float accelY = 1;
 float accelZ = 1;
+
+float accelgravityX;
+float accelgravityY;
+float accelgravityZ;
 
 int steps = 0;
 bool step_toggle = true;
@@ -105,7 +150,7 @@ void loop(){
    if(gps.encode(gpsSerial.read())){
     if(Firebase.ready() && signupisOk && (millis() - sendDataPrevMillis > 5000 || sendDataPrevMillis == 0) ){
       displayAccelInfo();
-      displayGPSInfo();
+      // displayGPSInfo();
       // displayPulse();
       writeGPSDatatoFirebase();
       writePulseSensorDatatoFirebase();
@@ -172,7 +217,140 @@ void writeAccelerometerDatatoFirebase(float* filter){
         delay(10);
 }
 
+void stepCount(){
+  /*
+  https://www.aosabook.org/en/500L/a-pedometer-in-the-real-world.html
+  Rolling array of accel data
+  3 filters:
+   1. Low-pass to remove higher than 5hz jiggles
+   2. High pass to remove lower than 1hz. No one walks slower than that.
+   3. Have a threshold that needs to be met. (++ in the positive direction & after crossing a 0. Avoids over counting)
 
+
+  Steps:
+  Create an array that holds all the data
+  0Hz low pass filter to split user acceleration and gravitational acceleration
+  Filter the data for low pass and high pass
+  Dot product user and gravitational data. Get clean sine wave
+  If threshold is met, increment step
+  */
+
+  int sampleSize = 5; //Can change the sample size and delays to improve the algorithm
+  int sampleSize = 50; //Can change the sample size and delays to improve the algorithm
+  float accel[sampleSize][3];
+  float accel_along_gravity[sampleSize][3];
+  float dot_product[sampleSize]; 
+  float filtered_accel[sampleSize] = {0.0}; //Final array that will hold the data after two filters
+  float filtered_accel_low_pass[sampleSize] = {0.0};
+
+  float threshold = 0.09;
+
+  // Initialize first two rows of new array to 0;
+  for (int i = 0; i <= 1 ; i++){ 
+      for(int j = 0; j < 3; j++){  
+      accel_along_gravity[i][j] = 0;
+      }    
+    }
+
+  // IIR alpha and beta coefficients from the internet
+  float coefficients_low_pass_0Hz[] = {-1.979133761292768, 0.979521463540373, 0.000086384997973502, 0.000172769995947004, 0.000086384997973502};
+  float coefficients_low_pass_5Hz[] = {0.095465967120306, -0.172688631608676, 0.095465967120306, -1.80898117793047, 0.827224480562408};
+  float coefficients_high_pass_1Hz[] = {0.953986986993339, -1.907503180919730, 0.953986986993339, -1.905384612118461, 0.910092542787947};
+
+  // Get array of acceleration data
+  for (int i=0; i < sampleSize; i++){
+
+     imu.readAccel();
+
+    accel[i][0] = accelX = imu.ax;  
+    accel[i][1] = accelY = imu.ay;  
+    accel[i][2] = accelZ = imu.az + 1.0;  // Undoing the calibration in readAccel()
+
+    delay(10);
+  }
+ 
+  // Infinite Impulse Response filter
+  // Filter out the gravitational acceleration and store it in new array
+  for (int i = 2; i < sampleSize ; i++){ 
+    for(int j = 0; j < 3; j++){ // Nested for loop for each axis
+  
+      accel_along_gravity[i][j] = 
+      accel[i][j]                    * coefficients_low_pass_0Hz[0] +
+      accel[i-1][j]                  * coefficients_low_pass_0Hz[1] +
+      accel[i-2][j]                  * coefficients_low_pass_0Hz[2] -
+      accel_along_gravity[i-1][j]    * coefficients_low_pass_0Hz[3] -
+      accel_along_gravity[i-2][j]    * coefficients_low_pass_0Hz[4];
+      }
+  }
+
+  // Subtract gravity from raw acceleration to get user acceleration
+  for (int i = 2; i < sampleSize ; i++){ 
+    for(int j = 0; j < 3; j++){
+      accel[i][j] -= accel_along_gravity[i][j];     
+    }
+  }
+
+  // Dot product between accel and grav-accel to get a single value that is along the gravitaional axis regardless of the sensor's orientation
+  for (int i = 0; i < sampleSize ; i++)
+    {         
+      dot_product[i] =  
+      accel[i][0] * accel_along_gravity[i][0] + 
+      accel[i][1] * accel_along_gravity[i][1] + 
+      accel[i][2] * accel_along_gravity[i][2];
+    }
+    
+  // Filter low pass below 5Hz
+  for (int i = 2; i < sampleSize ; i++){
+    filtered_accel_low_pass[i] = (
+      dot_product[i]                  * coefficients_low_pass_5Hz[0] +
+      dot_product[i-1]                * coefficients_low_pass_5Hz[1] +
+      dot_product[i-2]                * coefficients_low_pass_5Hz[2] -
+      filtered_accel_low_pass[i-1]    * coefficients_low_pass_5Hz[3] -
+      filtered_accel_low_pass[i-2]    * coefficients_low_pass_5Hz[4]
+      );}
+
+  // Second Filter now high pass above 1Hz
+  for (int i = 2; i < sampleSize ; i++){
+    filtered_accel[i] = (
+      filtered_accel_low_pass[i]      * coefficients_high_pass_1Hz[0] +
+      filtered_accel_low_pass[i-1]    * coefficients_high_pass_1Hz[1] +
+      filtered_accel_low_pass[i-2]    * coefficients_high_pass_1Hz[2] -
+      filtered_accel[i-1]             * coefficients_high_pass_1Hz[3] -
+      filtered_accel[i-2]             * coefficients_high_pass_1Hz[4]
+      );}
+
+  // Count steps
+  for (int i = 1; i < sampleSize; i++){
+
+  // Only increments if crossing the threshold in the positive direction
+  if ((filtered_accel[i] >= threshold) && (filtered_accel[i-1] < threshold) && (step_toggle == true) ){
+    steps++;
+    step_toggle = false;
+  }
+
+  // Can only reset the toggle if the acceleration crossed the 0 in the negative direction
+  if ((filtered_accel[i] < 0) && (filtered_accel[i-1] >=0)) step_toggle = true;
+  }
+
+  writeAccelerometerDatatoFirebase(filtered_accel);
+
+Serial.println("Raw Acceleration pointing down");
+Serial.print(
+  String(dot_product[0]) + ", " +
+  String(dot_product[1]) + ", " +
+  String(dot_product[2]) + ", " +
+  String(dot_product[3]) + ", " +
+  String(dot_product[4]));
+
+
+Serial.println("Filtered Acceleration pointing down");
+Serial.print(
+  String(filtered_accel[0]) + ", " +
+  String(filtered_accel[1]) + ", " +
+  String(filtered_accel[2]) + ", " +
+  String(filtered_accel[3]) + ", " +
+  String(filtered_accel[4]));
+}
 
 // void displayPulse(){
 //   int irValue = digitalRead(IR_SENSOR_PIN); // Read the IR sensor value
@@ -182,23 +360,7 @@ void writeAccelerometerDatatoFirebase(float* filter){
 // }
 
 void displayAccelInfo() {
-  imu.readAccel();
-  imu.readGyro();
-  imu.readMag();
-  
-  float accelX = imu.ax;
-  float accelY = imu.ay;
-  float accelZ = imu.az;
-  
-  float gyroX = imu.gx;
-  float gyroY = imu.gy;
-  float gyroZ = imu.gz;
-  
-  float magX = imu.mx;
-  float magY = imu.my;
-  float magZ = imu.mz;
-
-
+ 
   Serial.println();
   Serial.println("Acceleration:");
   Serial.print("X: ");
@@ -271,4 +433,3 @@ void displayGPSInfo()
     Serial.println("Not Available");
   }
 }
-
