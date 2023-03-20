@@ -77,6 +77,7 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
         setupUI();
         onClickListeners();
 
+
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
     }
@@ -186,7 +187,7 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
         databaseGPSReference.child("Time").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        String output = "Date : " + snapshot.getValue().toString();
+                        String output = "Time : " + snapshot.getValue().toString();
                         Time.setText(output);
             }
             @Override

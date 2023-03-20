@@ -40,9 +40,13 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseUser user;
 
-    private DatabaseReference databaseGPSReference, databasePulseReference, databaseStepReference;
+    private DatabaseReference databaseGPSReference, databasePulseReference, databaseStepReference, databaseUserReference, latestActivity, currentActivity;
 
     boolean timerStarted = false;
+
+    private long step, bpm, longitude, latitude, altitude;
+    private String date, currentTime, currentActivityTime, userKey;
+
 
     Timer timer;
     TimerTask timerTask;
@@ -61,23 +65,23 @@ public class MainActivity extends AppCompatActivity {
         markers = new ArrayList<>();
         timer = new Timer();
         setupUI();
+        getData();
         onClickListeners();
         stopButton.setVisibility(View.GONE);
         playButton.setVisibility(View.GONE);
         startTimer();
 
-        getData();
-
     }
 
     private void startTimer() {
-            if(timerStarted == false){
+            if(!timerStarted){
                 timerStarted = true;
                 timerTask = new TimerTask() {
                     @Override
                     public void run() {
                         runOnUiThread(new Runnable() {
                             @Override
+                            // This code runs once a second
                             public void run() {
                                 time++;
                                 //this shows the timer time
@@ -87,6 +91,10 @@ public class MainActivity extends AppCompatActivity {
                                 if(time%5 == 0){
                                     markers.add(new LatLng(home.locationLatitude, home.locationLongitude));
                                 }
+
+                                // Sends to database
+                                getData();
+                                //sendData();
                             }
                         });
                     }
@@ -156,8 +164,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private float step, longitude, latitude, altitude, date;
-
     private void setupUI() {
         stopButton = findViewById(R.id.stopButtonID);
         playButton = findViewById(R.id.playButtonID);
@@ -175,18 +181,49 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
+        userKey = user.getUid();
+
 
         databasePulseReference = FirebaseDatabase.getInstance().getReference("Pulse Sensor/");
         databaseStepReference = FirebaseDatabase.getInstance().getReference("AccelerometerData/Acceleration/");
         databaseGPSReference = FirebaseDatabase.getInstance().getReference("GPSData/");
+        databaseUserReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activity");
+
+
+        // Get the latest node ID
+        databaseUserReference.child("node_count").get().addOnCompleteListener(task -> {
+        if (task.isSuccessful()){
+        Long latestNodeId=task.getResult().getValue(Long.class);
+
+        // Check if the latest node ID exists
+        if(latestNodeId==null){
+        // If it doesn't, start at 1
+        latestNodeId=1L;
+        }else{
+        // If it does, increment it
+        latestNodeId++;
+        }
+
+        // Update the node count to reflect the new node
+        databaseUserReference.child("node_count").setValue(latestNodeId);
+
+        // Set the new node with the latest ID as the key
+        latestActivity = databaseUserReference.child("Activity_" + String.valueOf(latestNodeId));
+        latestActivity.child("Run").setValue(" Records");
+        }
+        });
+
     }
 
-    private void getData(){
+    private String getData(){
+
+        currentActivityTime = getTimerText();
 
         databasePulseReference.child("State").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    bpm = (long) dataSnapshot.getValue();
                     String output = dataSnapshot.getValue().toString();
                     BPMValue.setText(output);
                 }
@@ -197,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    step = (long) dataSnapshot.getValue();
                     String output = dataSnapshot.getValue().toString();
                     stepValue.setText(output);
                 }
@@ -207,8 +245,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    String output = "Latitude : " + dataSnapshot.getValue().toString();
-                    // latitudeValue.setText(output);
+                    latitude = (long) dataSnapshot.getValue();
+                    String output = dataSnapshot.getValue().toString();
                 }
             }
         });
@@ -217,8 +255,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    String output = "Longitude : " + dataSnapshot.getValue().toString();
-                    //Longitude.setText(output);
+                    longitude = (long) dataSnapshot.getValue();
+                    String output = dataSnapshot.getValue().toString();
                 }
             }
         });
@@ -227,8 +265,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    altitude = (long) dataSnapshot.getValue();
                     String output = "Altitude : " + dataSnapshot.getValue().toString();
-                    //Altitude.setText(output);
                 }
             }
         });
@@ -237,8 +275,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    String output = dataSnapshot.getValue().toString();
-                    //dateValue.setText(output);
+                    date = dataSnapshot.getValue().toString();
                 }
             }
         });
@@ -246,12 +283,45 @@ public class MainActivity extends AppCompatActivity {
         databaseGPSReference.child("Time").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String output = "Date : " + snapshot.getValue().toString();
-                //Time.setText(output);
+                currentTime = snapshot.getValue().toString();
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
         });
+
+        return(date + "|" + currentTime + "|" + currentActivityTime + "|" + bpm + "|" + step + "|" + latitude + "|" + longitude + "|" + altitude);
+    }
+
+    private void sendData(){
+
+        // Get the latest node ID
+        latestActivity.child("number_of_entries").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()){
+                Long latestEntryId=task.getResult().getValue(Long.class);
+
+                // Check if the latest node ID exists
+                if(latestEntryId==null){
+                    // If it doesn't, start at 1
+                    latestEntryId=1L;
+                }else{
+                    // If it does, increment it
+                    latestEntryId++;
+                }
+
+                // Update the node count to reflect the new node
+                latestActivity.child("number_of_entries").setValue(latestEntryId);
+
+
+                // Set the new node with the latest ID as the key
+                currentActivity = latestActivity.child(String.valueOf(latestEntryId));
+
+                // Store the string array in the new node
+                currentActivity.setValue("Test");
+            }
+        });
+
+
+
     }
 
     public List<LatLng> getList(){
