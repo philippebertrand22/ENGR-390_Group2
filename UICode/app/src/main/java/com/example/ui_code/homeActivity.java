@@ -53,7 +53,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class homeActivity extends AppCompatActivity implements EventListener, OnMapReadyCallback {
-    private Button startRunning, steps,logout,graph;
+    private Button startRunning, steps,graph;
     private TextView Pulse, Longitude,Latitude,Altitude, Date, Time, Step;
 
     private static final String TAG = homeActivity.class.getSimpleName();
@@ -105,13 +105,6 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
             }
         });
 
-        logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(LoginPage.class);
-            }
-        });
-
     }
     private void startActivity(Class<?> destinationActivity) {
         Intent intent = new Intent(this, destinationActivity);
@@ -121,7 +114,6 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
     private void setupUI() {
         startRunning = findViewById(R.id.startRunningButtonID);
         graph = findViewById(R.id.graph_btn);
-        logout = findViewById(R.id.logout);
         steps = findViewById(R.id.StepsButton);
         Pulse = findViewById(R.id.Pulse);
         Longitude = findViewById(R.id.latitude);
@@ -247,23 +239,23 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.dropdown_menu, menu);
-        return true;
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.dropdown_menu,menu);
+        return super.onCreateOptionsMenu(menu);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
         switch (item.getItemId()) {
+            case R.id.settings:
+                // go to settings
+                return true;
             case R.id.logout:
+                // go to logout
                 startActivity(LoginPage.class);
                 return true;
-//            case //settings case
-//
-//                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
 }
