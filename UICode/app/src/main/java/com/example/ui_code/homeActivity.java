@@ -14,6 +14,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -243,5 +244,26 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
         map.animateCamera(CameraUpdateFactory.zoomIn());
         map.animateCamera(CameraUpdateFactory.zoomTo(5), 2000, null);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.dropdown_menu, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.logout:
+                startActivity(LoginPage.class);
+                return true;
+//            case //settings case
+//
+//                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
