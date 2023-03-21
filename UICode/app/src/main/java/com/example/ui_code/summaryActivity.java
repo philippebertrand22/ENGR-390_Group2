@@ -83,4 +83,27 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
             Polyline line = map.addPolyline(new PolylineOptions().add(main.markers.get(n), main.markers.get(n + 1)).width(5).color(Color.RED));
         }
     }
+    private void startActivity(Class<?> destinationActivity) {
+        Intent intent = new Intent(this, destinationActivity);
+        startActivity(intent);
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.dropdown_menu,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.settings:
+                // go to settings
+                return true;
+            case R.id.logout:
+                // go to logout
+                startActivity(LoginPage.class);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 }
