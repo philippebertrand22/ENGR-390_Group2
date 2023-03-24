@@ -1,5 +1,9 @@
 package com.example.ui_code;
 
+import static com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -23,6 +27,8 @@ import android.widget.TextView;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -53,8 +59,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class homeActivity extends AppCompatActivity implements EventListener, OnMapReadyCallback {
-    private Button startRunning, steps,graph;
-    private TextView Pulse, Longitude,Latitude,Altitude, Date, Time, Step;
+    private static final int REQUEST_CODE = 99;
+    private Button startRunning, steps, graph;
+    private TextView Pulse, Longitude, Latitude, Altitude, Date, Time, Step;
 
     private static final String TAG = homeActivity.class.getSimpleName();
     private GoogleMap map;
@@ -67,13 +74,21 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
 
     private FirebaseUser user;
 
+    private FusedLocationProviderClient fusedLocationClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+//        Latitude.setText(String.valueOf(locationLatitude));
+//        Longitude.setText((int) locationLongitude);
+
 
         setupUI();
         onClickListeners();
@@ -88,6 +103,53 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
             @Override
             public void onClick(View view) {
                 startActivity(MainActivity.class);
+            }
+        });
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityResultLauncher<String[]> locationPermissionRequest =
+                    registerForActivityResult(new ActivityResultContracts
+                                    .RequestMultiplePermissions(), result -> {
+                                Boolean fineLocationGranted = result.getOrDefault(
+                                        Manifest.permission.ACCESS_FINE_LOCATION, false);
+                                Boolean coarseLocationGranted = result.getOrDefault(
+                                        Manifest.permission.ACCESS_COARSE_LOCATION,false);
+                                if (fineLocationGranted != null && fineLocationGranted) {
+                                    // Precise location access granted.
+                                } else if (coarseLocationGranted != null && coarseLocationGranted) {
+                                    // Only approximate location access granted.
+                                } else {
+                                    // No location access granted.
+                                }
+                            }
+                    );
+// ...
+
+// Before you perform the actual permission request, check whether your app
+// already has the permissions, and whether your app needs to show a permission
+// rationale dialog. For more details, see Request permissions.
+            locationPermissionRequest.launch(new String[] {
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            });
+            return;
+        }
+        fusedLocationClient.getCurrentLocation(PRIORITY_BALANCED_POWER_ACCURACY, null).addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if(location != null){
+
+                    //THESE GET CURRENT LOCATION
+                    Latitude.setText(String.valueOf(location.getLatitude()));
+                    Longitude.setText(String.valueOf(location.getLongitude()));
+                    locationLatitude = location.getLatitude();
+                    locationLongitude = location.getLongitude();
+
+                    //makes a marker at current location
+                    LatLng here = new LatLng(locationLatitude,locationLongitude);
+                    map.addMarker(new MarkerOptions().position(here).title("Marker").icon(BitmapFromVector(getApplicationContext(), R.drawable.baseline_circle_24)));
+                    moveToCurrentLocation(here);
+                }
             }
         });
 
@@ -149,29 +211,29 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
 
         databaseGPSReference = FirebaseDatabase.getInstance().getReference("GPSData/");
 
-        databaseGPSReference.child("Latitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String output = "Latitude : " + dataSnapshot.getValue().toString();
-                    Latitude.setText(output);
-                    String latitude = dataSnapshot.getValue().toString();
-                    locationLatitude = Double.parseDouble(latitude);
-                }
-            }
-        });
-
-        databaseGPSReference.child("Longitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String output = "Longitude : " + dataSnapshot.getValue().toString();
-                    Longitude.setText(output);
-                    String longitude = dataSnapshot.getValue().toString();
-                    locationLatitude = Double.parseDouble(longitude);
-                }
-            }
-        });
+//        databaseGPSReference.child("Latitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+//            @Override
+//            public void onSuccess(DataSnapshot dataSnapshot) {
+//                if (dataSnapshot.exists()) {
+//                    String output = "Latitude : " + dataSnapshot.getValue().toString();
+//                    Latitude.setText(output);
+//                    String latitude = dataSnapshot.getValue().toString();
+//                    locationLatitude = Double.parseDouble(latitude);
+//                }
+//            }
+//        });
+//
+//        databaseGPSReference.child("Longitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+//            @Override
+//            public void onSuccess(DataSnapshot dataSnapshot) {
+//                if (dataSnapshot.exists()) {
+//                    String output = "Longitude : " + dataSnapshot.getValue().toString();
+//                    Longitude.setText(output);
+//                    String longitude = dataSnapshot.getValue().toString();
+//                    locationLatitude = Double.parseDouble(longitude);
+//                }
+//            }
+//        });
 
         databaseGPSReference.child("Altitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override
@@ -208,10 +270,9 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
         map.addMarker(new MarkerOptions().position(new LatLng(45, -75)).title("Random").icon(BitmapFromVector(getApplicationContext(), R.drawable.baseline_circle_24)));
-        LatLng here = new LatLng(locationLatitude,locationLongitude);
-        map.addMarker(new MarkerOptions().position(here).title("Marker").icon(BitmapFromVector(getApplicationContext(), R.drawable.baseline_circle_24)));
-        moveToCurrentLocation(here);
     }
+
+
 
     //this function creates a custom marker
     private BitmapDescriptor BitmapFromVector(Context context, int vectorResId) {
