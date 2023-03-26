@@ -9,16 +9,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
-import java.util.Objects;
 
 public class UserProfile extends AppCompatActivity {
 
@@ -53,7 +49,7 @@ public class UserProfile extends AppCompatActivity {
         date_of_birth = findViewById(R.id.dob);
         weight = findViewById(R.id.weight);
         height = findViewById(R.id.height);
-        Button = findViewById(R.id.button2);
+        Button = findViewById(R.id.confirmButton);
         new_user = mAuth.getCurrentUser();
         reference = FirebaseDatabase.getInstance().getReference("Users/" + mAuth.getUid().toString());
     }

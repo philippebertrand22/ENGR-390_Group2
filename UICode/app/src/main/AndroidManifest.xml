@@ -43,6 +43,11 @@
             </intent-filter>
         </activity>
 
+
+        <activity
+            android:name=".ChangeInfoActivity"
+            android:exported="false"
+            android:parentActivityName=".homeActivity" />
         <activity
             android:name=".UserProfile"
             android:exported="false"

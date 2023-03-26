@@ -97,6 +97,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         switch (item.getItemId()) {
             case R.id.settings:
                 // go to settings
+                startActivity(ChangeInfoActivity.class);
                 return true;
             case R.id.logout:
                 // go to logout

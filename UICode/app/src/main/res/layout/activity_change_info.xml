@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".UserProfile">
+    tools:context=".ChangeInfoActivity">
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/confirmButton"
@@ -14,23 +14,38 @@
         android:background="@drawable/round_btn"
         android:backgroundTint="#635FC6"
         android:elevation="@dimen/fab_margin"
-        android:fontFamily="sans-serif"
-        android:text="Next >"
+        android:text="Confirm"
         android:textColor="#FFFFFF"
         android:textSize="28sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.915" />
+        app:layout_constraintVertical_bias="0.950" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/editInfo"
+        android:layout_width="233dp"
+        android:layout_height="52dp"
+        android:background="@drawable/round_btn"
+        android:backgroundTint="#635FC6"
+        android:elevation="@dimen/fab_margin"
+        android:text="edit info"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.950" />
 
     <EditText
         android:id="@+id/gender"
         android:layout_width="358dp"
         android:layout_height="51dp"
-        android:digits="MALEFmalef"
         android:background="@drawable/custom_input"
         android:backgroundTint="@color/colorPrimary"
+        android:digits="MALEFmalef"
         android:drawableStart="@drawable/baseline_group_24"
         android:drawablePadding="12dp"
         android:hint="Gender"
@@ -42,14 +57,14 @@
         app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.513" />
+        app:layout_constraintVertical_bias="0.510" />
 
     <TextView
         android:id="@+id/textView8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/poppins_bold"
-        android:text="Let's complete your profile"
+
+        android:text="Change your profile Info"
         android:textAlignment="textStart"
         android:textColor="#1D1617"
         android:textSize="26sp"
@@ -64,7 +79,7 @@
         android:id="@+id/textView9"
         android:layout_width="288dp"
         android:layout_height="31dp"
-        android:fontFamily="@font/poppins_semibold"
+
         android:text="It will help us to know more about you!"
         android:textAlignment="center"
         android:textColor="#A39F9F"
@@ -79,11 +94,11 @@
 
     <EditText
         android:id="@+id/height"
-        android:digits="0123456789"
         android:layout_width="358dp"
         android:layout_height="51dp"
         android:background="@drawable/custom_input"
         android:backgroundTint="@color/colorPrimary"
+        android:digits="0123456789"
         android:drawableStart="@drawable/baseline_height_24"
         android:drawablePadding="12dp"
         android:hint="Height (Centimeters)"
@@ -94,15 +109,15 @@
         app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.786" />
+        app:layout_constraintVertical_bias="0.810" />
 
     <EditText
         android:id="@+id/dob"
         android:layout_width="358dp"
         android:layout_height="51dp"
-        android:digits="0123456789/"
         android:background="@drawable/custom_input"
         android:backgroundTint="@color/colorPrimary"
+        android:digits="0123456789/"
         android:drawableStart="@drawable/baseline_calendar_month_24"
         android:drawablePadding="12dp"
         android:hint="Date of birth (DD/MM/YYYY)"
@@ -113,15 +128,15 @@
         app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.602" />
+        app:layout_constraintVertical_bias="0.610" />
 
     <EditText
         android:id="@+id/weight"
-        android:digits="0123456789"
         android:layout_width="358dp"
         android:layout_height="51dp"
         android:background="@drawable/custom_input"
         android:backgroundTint="@color/colorPrimary"
+        android:digits="0123456789"
         android:drawableStart="@drawable/baseline_monitor_weight_24"
         android:drawablePadding="12dp"
         android:hint="Weight (Kilograms)"
@@ -132,7 +147,7 @@
         app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.695" />
+        app:layout_constraintVertical_bias="0.710" />
 
     <ImageView
         android:id="@+id/image2View"
