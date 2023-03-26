@@ -61,8 +61,7 @@
             android:parentActivityName=".homeActivity" />
         <activity
             android:name=".MainActivity"
-            android:exported="false"
-            android:parentActivityName=".homeActivity" />
+            android:exported="false" />
         <activity
             android:name=".summaryActivity"
             android:exported="false"

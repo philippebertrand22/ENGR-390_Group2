@@ -109,7 +109,7 @@ public class RegisterPage extends AppCompatActivity {
                                     Toast.makeText(view.getContext(), "User Successfully Added", Toast.LENGTH_SHORT).show();
                                     startActivity(UserProfile.class);
                                 } else {
-                                    Toast.makeText(view.getContext(), "Email already exists, consider loging in", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(view.getContext(), "Email already exists, consider logging in", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
