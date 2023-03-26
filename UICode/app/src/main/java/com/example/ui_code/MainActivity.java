@@ -45,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
 
     boolean timerStarted = false;
 
-    private long step, bpm, longitude, latitude, altitude;
+    private long bpm, longitude, latitude, altitude;
+    private String step;
     private String date, currentTime, currentActivityTime, userKey;
 
     Timer timer;
@@ -294,12 +295,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    step = (long) dataSnapshot.getValue();
+                    step = (String) dataSnapshot.getValue();
                     String output = dataSnapshot.getValue().toString();
                     stepValue.setText(output);
                 }
             }
         });
+
 
         databaseGPSReference.child("Latitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override

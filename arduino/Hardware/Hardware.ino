@@ -57,8 +57,8 @@ https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32
 #define WIFI_PASSWORD "11111111" // Wifi Password
 
 // Firebase Database API Key & URL
-#define API_KEY "AIzaSyCSK8XFtg3bPjTbOkvPT2JsBXwBTIRDWl8"                     // Firebase Project API Key
-#define DATABASE_URL "https://fitnessdata-6cc1e-default-rtdb.firebaseio.com/" // FireBase Database URL
+#define API_KEY "AIzaSyA6KZ8mN_LCGyCs7N-WdnBDtY7nfDIeuvM"                     // Firebase Project API Key
+#define DATABASE_URL "https://group2-b2cc0-default-rtdb.firebaseio.com/" // FireBase Database URL
 
 // GPIO PIN for the Pulse Heart Rate Sensor
 #define PULSE_PIN 13
