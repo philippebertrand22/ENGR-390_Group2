@@ -18,9 +18,9 @@ import java.util.List;
 
 public class UserProfile extends AppCompatActivity {
 
-    private String name, surname, email, gender, Date_of_birth, Weight, Height;
+    private String name, surname, email, gender, Age, Weight, Height;
 
-    private EditText Gender, date_of_birth, weight, height;
+    private EditText Gender, age, weight, height;
 
     private List<UserInfo> user_queue;
 
@@ -46,7 +46,7 @@ public class UserProfile extends AppCompatActivity {
 
     private void setupUI() {
         Gender = findViewById(R.id.gender);
-        date_of_birth = findViewById(R.id.dob);
+        age = findViewById(R.id.age);
         weight = findViewById(R.id.weight);
         height = findViewById(R.id.height);
         Button = findViewById(R.id.confirmButton);
@@ -59,17 +59,17 @@ public class UserProfile extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 gender = Gender.getText().toString();
-                Date_of_birth = date_of_birth.getText().toString();
+                Age = age.getText().toString();
                 Weight = weight.getText().toString();
                 Height = height.getText().toString();
 
-                if (gender.isEmpty() || Date_of_birth.isEmpty() || Weight.isEmpty() || Height.isEmpty()) {
+                if (gender.isEmpty() || Age.isEmpty() || Weight.isEmpty() || Height.isEmpty()) {
                     if (gender.isEmpty()) {
                         Toast.makeText(view.getContext(), "Enter Gender: Male or Female", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    if (Date_of_birth.isEmpty()) {
-                        Toast.makeText(view.getContext(), "Enter Date of Birth", Toast.LENGTH_SHORT).show();
+                    if (Age.isEmpty()) {
+                        Toast.makeText(view.getContext(), "Enter Age", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     if (Weight.isEmpty()) {
@@ -82,12 +82,12 @@ public class UserProfile extends AppCompatActivity {
                     }
                 }
 
-                if (!gender.isEmpty() && !Date_of_birth.isEmpty() && !Weight.isEmpty() && !Height.isEmpty()) {
+                if (!gender.isEmpty() && !Age.isEmpty() && !Weight.isEmpty() && !Height.isEmpty()) {
                     if ((gender.equalsIgnoreCase("male") || gender.equalsIgnoreCase("female")) &&
-                            Date_of_birth.length() == 10 && Date_of_birth.contains("/") && Weight.length() <= 3 &&  Weight.length() >= 2
+                            Age.length() == 2 && Weight.length() <= 3 &&  Weight.length() >= 2
                             && Height.length() <=3 && Height.length() >=2) {
                         reference.child("gender").setValue(gender);
-                        reference.child("data_of_birth").setValue(Date_of_birth);
+                        reference.child("age").setValue(Age);
                         reference.child("height").setValue(Height);
                         reference.child("weight").setValue(Weight);
 
@@ -100,8 +100,8 @@ public class UserProfile extends AppCompatActivity {
                         return;
                     }
 
-                    if (!(Date_of_birth.length() == 10 && Date_of_birth.contains("/"))){
-                        Toast.makeText(view.getContext(), "Date of birth must be of format DD/MM/YYYY.", Toast.LENGTH_SHORT).show();
+                    if (!(Age.length() == 2)){
+                        Toast.makeText(view.getContext(), "Age must be between 10 and 99 years old", Toast.LENGTH_SHORT).show();
                         return;
                     }
 

@@ -269,7 +269,6 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
-        map.addMarker(new MarkerOptions().position(new LatLng(45, -75)).title("Random").icon(BitmapFromVector(getApplicationContext(), R.drawable.baseline_circle_24)));
     }
 
 
@@ -296,7 +295,7 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
     private void moveToCurrentLocation(LatLng currentLocation) {
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
         map.animateCamera(CameraUpdateFactory.zoomIn());
-        map.animateCamera(CameraUpdateFactory.zoomTo(5), 2000, null);
+        map.animateCamera(CameraUpdateFactory.zoomTo(16), 2000, null);
     }
 
     @Override
