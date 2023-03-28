@@ -30,7 +30,7 @@ public class ChangeInfoActivity extends AppCompatActivity {
     private FirebaseUser user;
     private DatabaseReference reference;
 
-    private boolean check = false;
+    private boolean checkAge, checkGender, checkWeight, checkHeight = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,43 +108,43 @@ public class ChangeInfoActivity extends AppCompatActivity {
                 genderEditText.setText(gender);
 
                 if(age.length() != 2){
-                    check = false;
+                    checkAge = false;
                     age.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
                 }
                 else{
-                    check = true;
+                    checkAge = true;
                     age.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
 
                 if(weight.length() <= 3 && weight.length() >= 2){
-                    check = true;
+                    checkWeight = true;
                     weight.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
                 else{
-                    check = false;
+                    checkWeight = false;
                     weight.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
                 }
 
                 if(height.length() <= 3 && height.length() >= 2){
-                    check = true;
+                    checkHeight = true;
                     height.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
                 else{
-                    check = false;
+                    checkHeight = false;
                     height.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
                 }
 
                 if(gender.equalsIgnoreCase("male") || gender.equalsIgnoreCase("female")){
-                    check = true;
+                    checkGender = true;
                     genderEditText.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
                 else{
-                    check = false;
+                    checkGender = false;
                     genderEditText.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
                 }
 
 
-                if(check == true){
+                if(checkAge == true && checkHeight == true && checkGender == true && checkWeight == true){
                     reference.child("gender").setValue(genderEditText.getText().toString());
                     reference.child("age").setValue(age.getText().toString());
                     reference.child("height").setValue(height.getText().toString());
