@@ -3,11 +3,12 @@ package com.example.ui_code;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.content.res.ResourcesCompat;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -20,16 +21,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class RegisterPage extends AppCompatActivity {
 
-    private AppCompatButton Button;
+    private AppCompatButton registerButton;
 
-    private String surname, name,email, password;
+    private String Surname, Name, Email, Password;
 
-    private EditText Surname, Name, Email, Password;
+    private EditText surname, name, email, password;
 
     private TextView login_link;
 
@@ -38,6 +36,8 @@ public class RegisterPage extends AppCompatActivity {
     private DatabaseReference users_info_Reference;
 
     private FirebaseAuth mAuth;
+
+    boolean checkEmail, checkPass, checkName, checkSurname = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +50,11 @@ public class RegisterPage extends AppCompatActivity {
     }
 
     private void setupUI(){
-        Surname = findViewById(R.id.surname);
-        Name = findViewById(R.id.name4);
-        Email = findViewById(R.id.email);
-        Password = findViewById(R.id.password);
-        Button = findViewById(R.id.button);
+        surname = findViewById(R.id.surname);
+        name = findViewById(R.id.name4);
+        email = findViewById(R.id.email);
+        password = findViewById(R.id.password);
+        registerButton = findViewById(R.id.registerButton);
         login_link = findViewById(R.id.textView7);
     }
 
@@ -66,45 +66,61 @@ public class RegisterPage extends AppCompatActivity {
             }
         });
 
-        Button.setOnClickListener(new View.OnClickListener() {
+        registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                surname = Surname.getText().toString();
-                name = Name.getText().toString();
-                email = Email.getText().toString();
-                password = Password.getText().toString();
+                Surname = surname.getText().toString();
+                Name = name.getText().toString();
+                Email = email.getText().toString();
+                Password = password.getText().toString();
 
-                if (surname.isEmpty() || name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                    if (surname.isEmpty()) {
-                        Toast.makeText(view.getContext(), "Enter Surname", Toast.LENGTH_SHORT).show();
-                        return;
+                    if(Name.length() < 1){
+                        checkName = false;
+                        name.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
                     }
-                    if (name.isEmpty()) {
-                        Toast.makeText(view.getContext(), "Enter Name", Toast.LENGTH_SHORT).show();
-                        return;
+                    else{
+                        checkName = true;
+                        name.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
                     }
-                    if (email.isEmpty()) {
-                        Toast.makeText(view.getContext(), "Enter Email", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if (password.isEmpty()) {
-                        Toast.makeText(view.getContext(), "Enter Password", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                }
 
-                if (!email.isEmpty() && !surname.isEmpty() && !password.isEmpty() && !name.isEmpty()) {
-                    if (email.contains(".com") && password.length() >= 6) {
-                        System.out.println("Surname:" + surname);
-                        System.out.println("Name:" + name);
-                        System.out.println("Email:" + email);
-                        System.out.println("Password:" + password);
+                    if(Surname.length() < 1){
+                        checkSurname = false;
+                        surname.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                    }
+                    else{
+                        checkSurname = true;
+                        surname.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                    }
 
-                        mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    if(Password.length() < 6){
+                        checkPass = false;
+                        password.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                    }
+                    else{
+                        checkPass = true;
+                        password.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                    }
+
+                    if(Email.contains(".com") && Email.contains("@")){
+                        checkEmail = true;
+                        email.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                    }
+                    else{
+                        checkEmail = false;
+                        email.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                    }
+
+                    if(checkEmail == true && checkName == true && checkSurname == true && checkPass == true){
+                        System.out.println("Surname:" + Surname);
+                        System.out.println("Name:" + Name);
+                        System.out.println("Email:" + Email);
+                        System.out.println("Password:" + Password);
+
+                        mAuth.createUserWithEmailAndPassword(Email, Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if(task.isSuccessful()){
-                                    new_user = new UserInfo(name,surname,email,password);
+                                    new_user = new UserInfo(Name, Surname, Email, Password);
                                     users_info_Reference.child(mAuth.getUid().toString()).setValue(new_user);
                                     Toast.makeText(view.getContext(), "User Successfully Added", Toast.LENGTH_SHORT).show();
                                     startActivity(UserProfile.class);
@@ -114,16 +130,8 @@ public class RegisterPage extends AppCompatActivity {
                             }
                         });
                     }
-                    if (!email.contains(".com")) {
-                            Toast.makeText(view.getContext(), "Email Address is not valid", Toast.LENGTH_SHORT).show();
-                            return;
-                    }
-                    if (!(password.length() >= 6)) {
-                            Toast.makeText(view.getContext(), "Password must contain 6 characters at least.", Toast.LENGTH_SHORT).show();
-                            return;
-                    }
-                 }
-              }
+
+            }
         });
     }
 
