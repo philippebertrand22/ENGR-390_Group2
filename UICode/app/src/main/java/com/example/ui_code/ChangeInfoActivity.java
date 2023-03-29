@@ -1,13 +1,18 @@
 package com.example.ui_code;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -18,12 +23,14 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class ChangeInfoActivity extends AppCompatActivity {
     private String name, surname, email, gender, Date_of_birth, Weight, Height, userKey;
-    private EditText genderEditText, date_of_birth, weight, height;
+    private EditText genderEditText, age, weight, height;
     private Button confirm, edit;
     private FirebaseAuth mAuth;
 
     private FirebaseUser user;
     private DatabaseReference reference;
+
+    private boolean checkAge, checkGender, checkWeight, checkHeight = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +43,7 @@ public class ChangeInfoActivity extends AppCompatActivity {
 
     private void setupUI() {
         genderEditText = findViewById(R.id.gender);
-        date_of_birth = findViewById(R.id.dob);
+        age = findViewById(R.id.age);
         weight = findViewById(R.id.weight);
         height = findViewById(R.id.height);
         confirm = findViewById(R.id.confirmButton);
@@ -51,15 +58,15 @@ public class ChangeInfoActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 genderEditText.setText((String) dataSnapshot.getValue());
-                genderEditText.setEnabled(false);
+                genderEditText.setInputType(0);
             }
         });
 
-        reference.child("data_of_birth").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+        reference.child("age").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
-                date_of_birth.setText((String) dataSnapshot.getValue());
-                date_of_birth.setEnabled(false);
+                age.setText((String) dataSnapshot.getValue());
+                age.setInputType(0);
             }
         });
 
@@ -67,7 +74,7 @@ public class ChangeInfoActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 height.setText((String) dataSnapshot.getValue());
-                height.setEnabled(false);
+                height.setInputType(0);
             }
         });
 
@@ -75,7 +82,7 @@ public class ChangeInfoActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 weight.setText((String) dataSnapshot.getValue());
-                weight.setEnabled(false);
+                weight.setInputType(0);
             }
         });
     }
@@ -87,27 +94,70 @@ public class ChangeInfoActivity extends AppCompatActivity {
             public void onClick(View view) {
                 edit.setVisibility(View.GONE);
                 confirm.setVisibility(View.VISIBLE);
-                genderEditText.setEnabled(true);
-                date_of_birth.setEnabled(true);
-                height.setEnabled(true);
-                weight.setEnabled(true);
+                genderEditText.setInputType(1);
+                age.setInputType(1);
+                height.setInputType(1);
+                weight.setInputType(1);
             }
         });
 
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                edit.setVisibility(View.VISIBLE);
-                confirm.setVisibility(View.GONE);
-                genderEditText.setEnabled(false);
-                date_of_birth.setEnabled(false);
-                height.setEnabled(false);
-                weight.setEnabled(false);
+                gender = genderEditText.getText().toString().toLowerCase();
+                genderEditText.setText(gender);
 
-                reference.child("gender").setValue(genderEditText.getText().toString());
-                reference.child("data_of_birth").setValue(date_of_birth.getText().toString());
-                reference.child("height").setValue(height.getText().toString());
-                reference.child("weight").setValue(weight.getText().toString());
+                if(age.length() != 2){
+                    checkAge = false;
+                    age.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                }
+                else{
+                    checkAge = true;
+                    age.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                }
+
+                if(weight.length() <= 3 && weight.length() >= 2){
+                    checkWeight = true;
+                    weight.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                }
+                else{
+                    checkWeight = false;
+                    weight.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                }
+
+                if(height.length() <= 3 && height.length() >= 2){
+                    checkHeight = true;
+                    height.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                }
+                else{
+                    checkHeight = false;
+                    height.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                }
+
+                if(gender.equalsIgnoreCase("male") || gender.equalsIgnoreCase("female")){
+                    checkGender = true;
+                    genderEditText.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                }
+                else{
+                    checkGender = false;
+                    genderEditText.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                }
+
+
+                if(checkAge == true && checkHeight == true && checkGender == true && checkWeight == true){
+                    reference.child("gender").setValue(genderEditText.getText().toString());
+                    reference.child("age").setValue(age.getText().toString());
+                    reference.child("height").setValue(height.getText().toString());
+                    reference.child("weight").setValue(weight.getText().toString());
+
+                    edit.setVisibility(View.VISIBLE);
+                    confirm.setVisibility(View.GONE);
+                    genderEditText.setInputType(0);
+                    age.setInputType(0);
+                    height.setInputType(0);
+                    weight.setInputType(0);
+                }
+
             }
         });
     }

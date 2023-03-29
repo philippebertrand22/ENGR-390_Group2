@@ -256,6 +256,8 @@ public class MainActivity extends AppCompatActivity {
                         latestNodeId++;
                     }
                     if (latestNodeId >= 50) {
+                        //TODO UN LIMIT TIMER
+
                         //Limit the amount of entries for the time being
                         stopTimer(); // Stops the timer and hence the queries
                     }
