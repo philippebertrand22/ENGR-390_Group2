@@ -64,24 +64,11 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         setContentView(R.layout.activity_summary);
         text = findViewById(R.id.textView);
 
-        main = new MainActivity();
-        List<LatLng> markers = main.getList();
-
-//        if(markers.size() == 0){
-//            System.out.println("THE ARRAY LIST IS EMPTY");
-//        }
-//        else {
-//            System.out.println(markers.get(0));
-//        }
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
 
-        //loop to create path
-        for(int n = 0;n < main.markers.size();n++) {
-            Polyline line = map.addPolyline(new PolylineOptions().add(main.markers.get(n), main.markers.get(n + 1)).width(5).color(Color.RED));
-        }
     }
     private void startActivity(Class<?> destinationActivity) {
         Intent intent = new Intent(this, destinationActivity);
