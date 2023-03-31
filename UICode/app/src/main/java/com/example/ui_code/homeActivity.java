@@ -86,13 +86,8 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        Latitude.setText(String.valueOf(locationLatitude));
-//        Longitude.setText((int) locationLongitude);
-
-
         setupUI();
         onClickListeners();
-
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
@@ -249,7 +244,7 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    String output = "Date : " + dataSnapshot.getValue().toString();
+                    String output = "TEST : " + dataSnapshot.getValue().toString();
                     Date.setText(output);
                 }
             }

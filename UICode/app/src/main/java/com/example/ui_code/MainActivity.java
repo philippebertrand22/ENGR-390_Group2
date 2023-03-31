@@ -1,9 +1,17 @@
 package com.example.ui_code;
 
+import static com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,7 +19,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
@@ -45,16 +56,19 @@ public class MainActivity extends AppCompatActivity {
 
     boolean timerStarted = false;
 
-    private long bpm, longitude, latitude, altitude;
+    private long bpm, altitude;
+    private double longitude, latitude;
+
+    private LatLng here;
     private String step;
     private String date, currentTime, currentActivityTime, userKey;
 
+    private FusedLocationProviderClient fusedLocationClient;
     Timer timer;
     TimerTask timerTask;
     Double time = 0.0;
 
-    public ArrayList<LatLng> markers;
-    homeActivity home = new homeActivity();
+    public static Long latestNodeId;
 
     /*
     How the activity logs work:
@@ -68,7 +82,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        markers = new ArrayList<>();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         timer = new Timer();
         setupUI();
         getData();
@@ -92,13 +107,11 @@ public class MainActivity extends AppCompatActivity {
                                 //this shows the timer time
                                 timeValue.setText(getTimerText());
 
-                                //add a marker in the list
-                                if(time%5 == 0){
-                                    markers.add(new LatLng(home.locationLatitude, home.locationLongitude));
+                                //TODO FIX addNewEntry rate so it doesn't lose data
+                                if(time % 4 == 0) {
+                                    // Adds sensor values as new entry in database
+                                    addNewEntry(currentActivity, getData());
                                 }
-
-                                // Adds sensor values as new entry in database
-                                addNewEntry(currentActivity, getData());
                             }
                         });
                     }
@@ -213,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
         // Get the latest activity count
         rootRef.child("activity_count").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                Long latestNodeId = task.getResult().getValue(Long.class);
+                latestNodeId = task.getResult().getValue(Long.class);
 
                 // Check if the latest node ID exists
                 if (latestNodeId == null) {
@@ -271,7 +284,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-
     }
 
     private interface OnNewFolderCreatedListener {
@@ -304,27 +316,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        databaseGPSReference.child("Latitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    latitude = (long) dataSnapshot.getValue();
-                    String output = dataSnapshot.getValue().toString();
-                }
-            }
-        });
-
-        databaseGPSReference.child("Longitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    longitude = (long) dataSnapshot.getValue();
-                    String output = dataSnapshot.getValue().toString();
-                }
-            }
-        });
-
         databaseGPSReference.child("Altitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
@@ -353,13 +344,63 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {}
         });
 
-        return("Date: " + date + " | Time: " + currentTime + " | Running Time: " + currentActivityTime + " | HeartBeat: " + bpm + " | Steps: " + step + " | Latitude: " + latitude + " | Longitude: " + longitude + " | Altitude: " + altitude);
+        //this makes the GPS data ready to send
+        sendGPS();
+
+        return("Date: " + date
+                + " | Time: " + currentTime
+                + " | Running Time: " + currentActivityTime
+                + " | HeartBeat: " + bpm
+                + " | Steps: " + step
+                + " | Latitude: [" + latitude
+                + "] | Longitude: {" + longitude
+                + "} | Altitude: " + altitude);
     }
 
-    public List<LatLng> getList(){
-        return markers;
-    }
+    private void sendGPS() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityResultLauncher<String[]> locationPermissionRequest =
+                    registerForActivityResult(new ActivityResultContracts
+                                    .RequestMultiplePermissions(), result -> {
+                                Boolean fineLocationGranted = result.getOrDefault(
+                                        android.Manifest.permission.ACCESS_FINE_LOCATION, false);
+                                Boolean coarseLocationGranted = result.getOrDefault(
+                                        android.Manifest.permission.ACCESS_COARSE_LOCATION, false);
+                                if (fineLocationGranted != null && fineLocationGranted) {
+                                    // Precise location access granted.
+                                } else if (coarseLocationGranted != null && coarseLocationGranted) {
+                                    // Only approximate location access granted.
+                                } else {
+                                    // No location access granted.
+                                }
+                            }
+                    );
+            // ...
 
+            // Before you perform the actual permission request, check whether your app
+            // already has the permissions, and whether your app needs to show a permission
+            // rationale dialog. For more details, see Request permissions.
+            locationPermissionRequest.launch(new String[]{
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            });
+            return;
+        }
+        fusedLocationClient.getCurrentLocation(PRIORITY_BALANCED_POWER_ACCURACY, null).addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (location != null) {
+
+                    //THESE GET CURRENT LOCATION
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+
+                    //makes a marker at current location
+                    here = new LatLng(latitude, longitude);
+                }
+            }
+        });
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Check if the user clicked the back button in the top left corner

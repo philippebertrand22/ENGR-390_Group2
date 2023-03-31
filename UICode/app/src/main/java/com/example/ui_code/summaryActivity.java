@@ -36,6 +36,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -50,39 +52,74 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+
 import android.os.Bundle;
 
 public class summaryActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     GoogleMap map;
-    TextView text;
-    private MainActivity main;
+    TextView text, text1;
+
+    private DatabaseReference databaseLocationReference;
+    private FirebaseAuth mAuth;
+    private FirebaseUser user;
+    private String userKey;
+
+    private LatLng here;
+    private double latitude, longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
+       setupUI();
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+
+    }
+
+    private void setupUI() {
         text = findViewById(R.id.textView);
+        text1 = findViewById(R.id.textView1);
 
-        main = new MainActivity();
-        List<LatLng> markers = main.getList();
-
-//        if(markers.size() == 0){
-//            System.out.println("THE ARRAY LIST IS EMPTY");
-//        }
-//        else {
-//            System.out.println(markers.get(0));
-//        }
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser(); // Use this to get any user info from the database
+        userKey = user.getUid(); // Userkey is unique to whoever logged in
     }
 
     @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap map) {
+        findLatLng();
 
-        //loop to create path
-        for(int n = 0;n < main.markers.size();n++) {
-            Polyline line = map.addPolyline(new PolylineOptions().add(main.markers.get(n), main.markers.get(n + 1)).width(5).color(Color.RED));
-        }
+        text1.setText(String.valueOf(longitude));
+
+        Polyline path = map.addPolyline(new PolylineOptions()
+                .add(
+                        new LatLng(latitude, longitude),
+                        new LatLng(38.4217937, -122.083922)));
+
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.4217937, -122.083922), 15));
     }
+
+    private void findLatLng() {
+        databaseLocationReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
+        
+        databaseLocationReference.child("1").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String data_string = dataSnapshot.getValue().toString();
+                    latitude = Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']')));
+                    longitude = Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}')));
+                    text.setText(String.valueOf(longitude));
+                }
+            }
+        });
+    }
+
     private void startActivity(Class<?> destinationActivity) {
         Intent intent = new Intent(this, destinationActivity);
         startActivity(intent);

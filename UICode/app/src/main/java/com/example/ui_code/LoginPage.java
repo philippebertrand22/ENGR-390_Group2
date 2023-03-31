@@ -3,8 +3,11 @@ package com.example.ui_code;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.content.res.ResourcesCompat;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -21,15 +24,16 @@ public class LoginPage extends AppCompatActivity {
 
     private AppCompatButton Button;
 
-    private String email, password;
+    private String Email, Password;
 
-    private EditText Email, Password;
+    private EditText email, password;
 
     private TextView register_link;
 
     private UserInfo user;
 
     private FirebaseAuth mAuth;
+    boolean checkPass, checkEmail = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +50,8 @@ public class LoginPage extends AppCompatActivity {
     }
 
     private void setupUI(){
-        Email = findViewById(R.id.email3);
-        Password = findViewById(R.id.password5);
+        email = findViewById(R.id.email3);
+        password = findViewById(R.id.password);
         Button = findViewById(R.id.button3);
         register_link = findViewById(R.id.textView12);
     }
@@ -63,47 +67,52 @@ public class LoginPage extends AppCompatActivity {
         Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                email = Email.getText().toString();
-                password = Password.getText().toString();
+                Email = email.getText().toString();
+                Password = password.getText().toString();
 
-                if (email.isEmpty() || password.isEmpty()) {
-                    if (email.isEmpty()) {
-                        Toast.makeText(view.getContext(), "Enter Email", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if (password.isEmpty()) {
-                        Toast.makeText(view.getContext(), "Enter Password", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+
+                if(Password.length() < 6){
+                    checkPass = false;
+                    password.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                }
+                else{
+                    checkPass = true;
+                    password.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
 
-                if (!email.isEmpty()  && !password.isEmpty()) {
-                    if (email.contains("@") && email.contains(".com") && password.length() >= 6) {
-                        System.out.println("Email:" + email);
-                        System.out.println("Password:" + password);
+                if(Email.contains(".com") && Email.contains("@")){
+                    checkEmail = true;
+                    email.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                }
+                else{
+                    checkEmail = false;
+                    email.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                }
 
-                        mAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                 if(task.isSuccessful()){
-                                     FirebaseUser user = mAuth.getCurrentUser();
-                                     System.out.println("Email " + user.getEmail());
-                                     System.out.println("ID " + user.getUid());
-                                     Toast.makeText(view.getContext(), "Login Success", Toast.LENGTH_SHORT).show();
-                                     startActivity(homeActivity.class);
-                                 }
+
+                if(checkEmail == true && checkPass == true){
+                    System.out.println("Email:" + Email);
+                    System.out.println("Password:" + Password);
+
+                    mAuth.signInWithEmailAndPassword(Email, Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()){
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                System.out.println("Email " + user.getEmail());
+                                System.out.println("ID " + user.getUid());
+                                Toast.makeText(view.getContext(), "Login Success", Toast.LENGTH_SHORT).show();
+                                startActivity(homeActivity.class);
                             }
-                        });
-
-                    }
-                    if (!(email.contains("@") && email.contains(".com"))) {
-                        Toast.makeText(view.getContext(), "Email Address is not valid", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if (!(password.length() >= 6)) {
-                        Toast.makeText(view.getContext(), "Password must contain 6 characters at least.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                            else{
+                                checkEmail = false;
+                                email.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                                checkPass = false;
+                                password.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
+                                Toast.makeText(view.getContext(), "Email or Password is Incorrect", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
                 }
             }
         });
