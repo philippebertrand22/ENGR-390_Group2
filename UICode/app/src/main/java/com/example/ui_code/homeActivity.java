@@ -244,7 +244,7 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    String output = "Date : " + dataSnapshot.getValue().toString();
+                    String output = "TEST : " + dataSnapshot.getValue().toString();
                     Date.setText(output);
                 }
             }

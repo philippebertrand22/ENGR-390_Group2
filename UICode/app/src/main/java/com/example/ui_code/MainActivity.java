@@ -107,8 +107,11 @@ public class MainActivity extends AppCompatActivity {
                                 //this shows the timer time
                                 timeValue.setText(getTimerText());
 
-                                // Adds sensor values as new entry in database
-                                addNewEntry(currentActivity, getData());
+                                //TODO FIX addNewEntry rate so it doesn't lose data
+                                if(time % 4 == 0) {
+                                    // Adds sensor values as new entry in database
+                                    addNewEntry(currentActivity, getData());
+                                }
                             }
                         });
                     }
@@ -313,27 +316,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-//        databaseGPSReference.child("Latitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-//            @Override
-//            public void onSuccess(DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.exists()) {
-//                    latitude = (long) dataSnapshot.getValue();
-//                    String output = dataSnapshot.getValue().toString();
-//                }
-//            }
-//        });
-//
-//        databaseGPSReference.child("Longitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-//            @Override
-//            public void onSuccess(DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.exists()) {
-//                    longitude = (long) dataSnapshot.getValue();
-//                    String output = dataSnapshot.getValue().toString();
-//                }
-//            }
-//        });
-
         databaseGPSReference.child("Altitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
@@ -370,9 +352,9 @@ public class MainActivity extends AppCompatActivity {
                 + " | Running Time: " + currentActivityTime
                 + " | HeartBeat: " + bpm
                 + " | Steps: " + step
-                + " | Latitude: " + latitude
-                + " | Longitude: " + longitude
-                + " | Altitude: " + altitude);
+                + " | Latitude: [" + latitude
+                + "] | Longitude: {" + longitude
+                + "} | Altitude: " + altitude);
     }
 
     private void sendGPS() {
