@@ -87,28 +87,31 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
-        for(int n = 1; n <= entry_count; n++) {
+//        for(int n = 1; n <= entry_count; n++) {
 //        int n = 1;
-            databaseLocationReference.child(String.valueOf(n)).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-                @Override
-                public void onSuccess(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        String data_string = dataSnapshot.getValue().toString();
-                        latitude = Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']')));
-                        longitude = Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}')));
-                        text.setText(String.valueOf(longitude));
-                        path.add(new LatLng(latitude, longitude));
-                    }
-                }
-            });
-        }
-        path.add(new LatLng(0, 0));
+//            databaseLocationReference.child(String.valueOf(n)).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+//                @Override
+//                public void onSuccess(DataSnapshot dataSnapshot) {
+//                    if (dataSnapshot.exists()) {
+//                        String data_string = dataSnapshot.getValue().toString();
+//                        latitude = Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']')));
+//                        longitude = Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}')));
+//                        text.setText(String.valueOf(longitude));
+//                        path.add(new LatLng(latitude, longitude));
+//                    }
+//                }
+//            });
+//        }
+        path.add(new LatLng(45.3685642, -73.981979));
+        path.add(new LatLng(45.368895, -73.980917));
+        path.add(new LatLng(45.368567, -73.979796));
+        path.add(new LatLng(45.368005, -73.980864));
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Polyline polyline = pathMap.addPolyline(path);
-                pathMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
+                pathMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.3685642, -73.981979), 20));
                 Toast.makeText(view.getContext(), "ADDING PATH", Toast.LENGTH_SHORT).show();
             }
         });
