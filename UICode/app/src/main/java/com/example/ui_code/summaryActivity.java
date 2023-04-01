@@ -60,7 +60,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
 
     GoogleMap map;
     TextView text, text1;
-
     private DatabaseReference databaseLocationReference;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -77,8 +76,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-
     }
 
     private void setupUI() {
