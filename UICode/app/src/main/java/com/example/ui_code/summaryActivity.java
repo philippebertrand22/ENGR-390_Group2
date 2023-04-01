@@ -87,8 +87,8 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
- //       for(int n = 1; n <= entry_count; n++) {
-        int n = 1;
+        for(int n = 1; n <= entry_count; n++) {
+//        int n = 1;
             databaseLocationReference.child(String.valueOf(n)).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
                 @Override
                 public void onSuccess(DataSnapshot dataSnapshot) {
@@ -101,7 +101,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                     }
                 }
             });
- //       }
+        }
         path.add(new LatLng(0, 0));
 
         button.setOnClickListener(new View.OnClickListener() {
