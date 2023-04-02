@@ -3,39 +3,22 @@ package com.example.ui_code;
 import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
+import android.widget.Toast;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -46,20 +29,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
-
-import android.os.Bundle;
+import java.util.ArrayList;
 
 public class summaryActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    GoogleMap map;
+    GoogleMap pathMap;
     TextView text, text1, text8;
+    Button  button;
+    
     private DatabaseReference databaseLocationReference;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -68,11 +46,18 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
     private LatLng here;
     private double latitude, longitude;
 
+    private int entry_count;
+
+    ArrayList<Double> Latitudes = new ArrayList<>();
+    ArrayList<Double> Longitudes = new ArrayList<>();
+    ArrayList<LatLng> Locations = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
-       setupUI();
+        setupUI();
+        findLatLng();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -80,7 +65,10 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
 
     private void setupUI() {
         text = findViewById(R.id.textView);
+        text1 = findViewById(R.id.textView1);
+        button = findViewById(R.id.button);
         text8 = findViewById(R.id.textView8);
+
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
@@ -89,29 +77,54 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
 
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
-        findLatLng();
-
-
-        Polyline path = map.addPolyline(new PolylineOptions()
-                .add(
-                        new LatLng(latitude, longitude),
-                        new LatLng(38.4217937, -122.083922)));
-
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.4217937, -122.083922), 15));
+        pathMap = map;
     }
 
     private void findLatLng() {
         databaseLocationReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
-        
-        databaseLocationReference.child("1").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+        PolylineOptions path = new PolylineOptions().width(8).color(Color.RED);
+
+        databaseLocationReference.child("entry_count").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String data_string = dataSnapshot.getValue().toString();
-                    latitude = Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']')));
-                    longitude = Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}')));
-                    text.setText(String.valueOf(longitude));
+                if (dataSnapshot.exists()){
+                    entry_count = Integer.parseInt(dataSnapshot.getValue().toString());
                 }
+            }
+        });
+
+
+            databaseLocationReference.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+                @Override
+                public void onSuccess(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                            String data_string = snapshot.getValue().toString();
+                            if(data_string.length() > 4) {
+                                Latitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']'))));
+                                Longitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}'))));
+                            }
+                        }
+                    }
+                }
+            });
+        for(int n = 0;n < Latitudes.size(); n++){
+            LatLng location = new LatLng(Latitudes.get(n), Longitudes.get(n));
+            Locations.add(location);
+ //           path.add(Locations.get(n));
+        }
+
+        path.add(new LatLng(45.3685642, -73.981979));
+        path.add(new LatLng(45.368895, -73.980917));
+//        path.add(new LatLng(45.368567, -73.979796));
+//        path.add(new LatLng(45.368005, -73.980864));
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               Polyline polyline = pathMap.addPolyline(path);
+                pathMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.3685642, -73.981979), 17));
+                Toast.makeText(view.getContext(), "ADDING PATH", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -134,6 +147,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                 return true;
             case R.id.logout:
                 // go to logout
+                mAuth.signOut();
                 startActivity(LoginPage.class);
                 return true;
             default:

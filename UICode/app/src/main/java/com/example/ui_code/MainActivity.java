@@ -27,6 +27,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +58,10 @@ public class MainActivity extends AppCompatActivity {
     boolean timerStarted = false;
 
     private long bpm, altitude;
-    private double longitude, latitude;
+    private double longitude, latitude, previousLng, previousLat;
+
+    private Location previousLocation;
+    private float distance, newDistance;
 
     private LatLng here;
     private String step;
@@ -291,7 +295,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getData(){
-
         currentActivityTime = getTimerText();
 
         databasePulseReference.child("State").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
@@ -312,16 +315,6 @@ public class MainActivity extends AppCompatActivity {
                     step = dataSnapshot.getValue().toString();
                     String output = dataSnapshot.getValue().toString();
                     stepValue.setText(output);
-                }
-            }
-        });
-
-        databaseGPSReference.child("Altitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    altitude = (long) dataSnapshot.getValue();
-                    String output = "Altitude : " + dataSnapshot.getValue().toString();
                 }
             }
         });
@@ -353,8 +346,7 @@ public class MainActivity extends AppCompatActivity {
                 + " | HeartBeat: " + bpm
                 + " | Steps: " + step
                 + " | Latitude: [" + latitude
-                + "] | Longitude: {" + longitude
-                + "} | Altitude: " + altitude);
+                + "] | Longitude: {" + longitude) + "}";
     }
 
     private void sendGPS() {
@@ -390,17 +382,32 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Location location) {
                 if (location != null) {
+                    if(previousLat == 0 & previousLng == 0) {
+                        //THESE GET CURRENT LOCATION
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
 
-                    //THESE GET CURRENT LOCATION
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
+                        previousLocation = new Location("");
+                        previousLocation.setLatitude(latitude);
+                        previousLocation.setLongitude(longitude);
 
-                    //makes a marker at current location
-                    here = new LatLng(latitude, longitude);
+                        previousLat = latitude;
+                        previousLng = longitude;
+
+                        distance = previousLocation.distanceTo(location);
+                        distanceValue.setText(String.valueOf(distance) + " meters");
+                    }
+                    else{
+                        distance = previousLocation.distanceTo(location) + distance;
+                        distanceValue.setText(String.valueOf(distance) + " meters");
+
+                        previousLocation = location;
+                    }
                 }
             }
         });
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Check if the user clicked the back button in the top left corner

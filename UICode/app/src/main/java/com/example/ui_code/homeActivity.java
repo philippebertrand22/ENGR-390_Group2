@@ -216,6 +216,7 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
                 return true;
             case R.id.logout:
                 // go to logout
+                mAuth.signOut();
                 startActivity(LoginPage.class);
                 return true;
             default:
