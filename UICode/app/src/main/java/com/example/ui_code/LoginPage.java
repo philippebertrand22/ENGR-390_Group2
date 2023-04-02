@@ -77,12 +77,12 @@ public class LoginPage extends AppCompatActivity {
                 }
                 else{
                     checkPass = true;
-                    password.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                    password.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
 
                 if(Email.contains(".com") && Email.contains("@")){
                     checkEmail = true;
-                    email.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                    email.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
                 else{
                     checkEmail = false;
