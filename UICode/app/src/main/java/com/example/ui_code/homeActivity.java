@@ -1,3 +1,5 @@
+//Example
+
 package com.example.ui_code;
 
 import static com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY;
