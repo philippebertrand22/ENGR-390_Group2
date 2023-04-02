@@ -26,10 +26,8 @@ public class ChangeInfoActivity extends AppCompatActivity {
     private EditText genderEditText, age, weight, height;
     private Button confirm, edit;
     private FirebaseAuth mAuth;
-
     private FirebaseUser user;
     private DatabaseReference reference;
-
     private boolean checkAge, checkGender, checkWeight, checkHeight = false;
 
     @Override
@@ -113,12 +111,12 @@ public class ChangeInfoActivity extends AppCompatActivity {
                 }
                 else{
                     checkAge = true;
-                    age.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                    age.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
 
                 if(weight.length() <= 3 && weight.length() >= 2){
                     checkWeight = true;
-                    weight.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                    weight.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
                 else{
                     checkWeight = false;
@@ -127,7 +125,7 @@ public class ChangeInfoActivity extends AppCompatActivity {
 
                 if(height.length() <= 3 && height.length() >= 2){
                     checkHeight = true;
-                    height.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                    height.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
                 else{
                     checkHeight = false;
@@ -136,7 +134,7 @@ public class ChangeInfoActivity extends AppCompatActivity {
 
                 if(gender.equalsIgnoreCase("male") || gender.equalsIgnoreCase("female")){
                     checkGender = true;
-                    genderEditText.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                    genderEditText.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                 }
                 else{
                     checkGender = false;

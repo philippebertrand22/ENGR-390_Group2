@@ -59,7 +59,7 @@ import android.os.Bundle;
 public class summaryActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     GoogleMap map;
-    TextView text, text1;
+    TextView text, text1, text8;
     private DatabaseReference databaseLocationReference;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -80,7 +80,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
 
     private void setupUI() {
         text = findViewById(R.id.textView);
-        text1 = findViewById(R.id.textView1);
+        text8 = findViewById(R.id.textView8);
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
@@ -91,7 +91,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
     public void onMapReady(@NonNull GoogleMap map) {
         findLatLng();
 
-        text1.setText(String.valueOf(longitude));
 
         Polyline path = map.addPolyline(new PolylineOptions()
                 .add(

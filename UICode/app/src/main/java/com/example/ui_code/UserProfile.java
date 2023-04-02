@@ -70,12 +70,12 @@ public class UserProfile extends AppCompatActivity {
                     }
                     else{
                         checkAge = true;
-                        age.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                        age.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                     }
 
                     if(weight.length() <= 3 && weight.length() >= 2){
                         checkWeight = true;
-                        weight.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                        weight.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                     }
                     else{
                         checkWeight = false;
@@ -84,7 +84,7 @@ public class UserProfile extends AppCompatActivity {
 
                     if(height.length() <= 3 && height.length() >= 2){
                         checkHeight = true;
-                        height.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                        height.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                     }
                     else{
                         checkHeight = false;
@@ -93,7 +93,7 @@ public class UserProfile extends AppCompatActivity {
 
                     if(Gender.equalsIgnoreCase("male") || Gender.equalsIgnoreCase("female")){
                         checkGender = true;
-                        gender.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                        gender.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                     }
                     else{
                         checkGender = false;

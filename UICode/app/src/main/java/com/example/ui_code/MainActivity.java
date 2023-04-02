@@ -309,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    step = (String) dataSnapshot.getValue();
+                    step = dataSnapshot.getValue().toString();
                     String output = dataSnapshot.getValue().toString();
                     stepValue.setText(output);
                 }
