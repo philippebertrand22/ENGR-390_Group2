@@ -35,7 +35,7 @@ import java.util.ArrayList;
 public class summaryActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     GoogleMap pathMap;
-    TextView text, text1, text8;
+    TextView text, text8;
     Button  button;
     
     private DatabaseReference databaseLocationReference;
@@ -43,9 +43,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
     private FirebaseUser user;
     private String userKey;
 
-    private LatLng here;
     private double latitude, longitude;
-
     private int entry_count;
 
     ArrayList<Double> Latitudes = new ArrayList<>();
@@ -65,7 +63,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
 
     private void setupUI() {
         text = findViewById(R.id.textView);
-        text1 = findViewById(R.id.textView1);
         button = findViewById(R.id.button);
         text8 = findViewById(R.id.textView8);
 

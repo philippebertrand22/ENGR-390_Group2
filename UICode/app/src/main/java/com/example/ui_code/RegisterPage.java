@@ -122,7 +122,6 @@ public class RegisterPage extends AppCompatActivity {
                                 if(task.isSuccessful()){
                                     new_user = new UserInfo(Name, Surname, Email, Password);
                                     users_info_Reference.child(mAuth.getUid().toString()).setValue(new_user);
-                                    Toast.makeText(view.getContext(), "User Successfully Added", Toast.LENGTH_SHORT).show();
                                     startActivity(UserProfile.class);
                                 } else {
                                     Toast.makeText(view.getContext(), "Email already exists, consider logging in", Toast.LENGTH_SHORT).show();

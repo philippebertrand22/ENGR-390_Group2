@@ -101,7 +101,6 @@ public class LoginPage extends AppCompatActivity {
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 System.out.println("Email " + user.getEmail());
                                 System.out.println("ID " + user.getUid());
-                                Toast.makeText(view.getContext(), "Login Success", Toast.LENGTH_SHORT).show();
                                 startActivity(homeActivity.class);
                             }
                             else{
