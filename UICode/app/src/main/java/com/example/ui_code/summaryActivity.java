@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +30,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+
 public class summaryActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     GoogleMap pathMap;
@@ -46,16 +49,19 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
 
     private int entry_count;
 
+    ArrayList<Double> Latitudes = new ArrayList<>();
+    ArrayList<Double> Longitudes = new ArrayList<>();
+    ArrayList<LatLng> Locations = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
-       setupUI();
+        setupUI();
+        findLatLng();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-
     }
 
     private void setupUI() {
@@ -71,7 +77,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         pathMap = map;
-        findLatLng();
     }
 
     private void findLatLng() {
@@ -87,31 +92,37 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
-//        for(int n = 1; n <= entry_count; n++) {
-//        int n = 1;
-//            databaseLocationReference.child(String.valueOf(n)).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-//                @Override
-//                public void onSuccess(DataSnapshot dataSnapshot) {
-//                    if (dataSnapshot.exists()) {
-//                        String data_string = dataSnapshot.getValue().toString();
-//                        latitude = Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']')));
-//                        longitude = Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}')));
-//                        text.setText(String.valueOf(longitude));
-//                        path.add(new LatLng(latitude, longitude));
-//                    }
-//                }
-//            });
-//        }
+
+            databaseLocationReference.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+                @Override
+                public void onSuccess(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                            String data_string = snapshot.getValue().toString();
+                            if(data_string.length() > 4) {
+                                Latitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']'))));
+                                Longitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}'))));
+                            }
+                        }
+                    }
+                }
+            });
+        for(int n = 0;n < Latitudes.size(); n++){
+            LatLng location = new LatLng(Latitudes.get(n), Longitudes.get(n));
+            Locations.add(location);
+ //           path.add(Locations.get(n));
+        }
+
         path.add(new LatLng(45.3685642, -73.981979));
         path.add(new LatLng(45.368895, -73.980917));
-        path.add(new LatLng(45.368567, -73.979796));
-        path.add(new LatLng(45.368005, -73.980864));
+//        path.add(new LatLng(45.368567, -73.979796));
+//        path.add(new LatLng(45.368005, -73.980864));
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Polyline polyline = pathMap.addPolyline(path);
-                pathMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.3685642, -73.981979), 20));
+               Polyline polyline = pathMap.addPolyline(path);
+                pathMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.3685642, -73.981979), 17));
                 Toast.makeText(view.getContext(), "ADDING PATH", Toast.LENGTH_SHORT).show();
             }
         });
@@ -135,6 +146,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                 return true;
             case R.id.logout:
                 // go to logout
+                mAuth.signOut();
                 startActivity(LoginPage.class);
                 return true;
             default:
