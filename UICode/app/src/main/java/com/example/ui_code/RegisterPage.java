@@ -54,7 +54,7 @@ public class RegisterPage extends AppCompatActivity {
         name = findViewById(R.id.name4);
         email = findViewById(R.id.email);
         password = findViewById(R.id.password);
-        registerButton = findViewById(R.id.registerButton);
+        registerButton = findViewById(R.id.button);
         login_link = findViewById(R.id.textView7);
     }
 
@@ -80,7 +80,7 @@ public class RegisterPage extends AppCompatActivity {
                     }
                     else{
                         checkName = true;
-                        name.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                        name.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                     }
 
                     if(Surname.length() < 1){
@@ -89,7 +89,7 @@ public class RegisterPage extends AppCompatActivity {
                     }
                     else{
                         checkSurname = true;
-                        surname.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                        surname.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                     }
 
                     if(Password.length() < 6){
@@ -98,12 +98,12 @@ public class RegisterPage extends AppCompatActivity {
                     }
                     else{
                         checkPass = true;
-                        password.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                        password.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                     }
 
                     if(Email.contains(".com") && Email.contains("@")){
                         checkEmail = true;
-                        email.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, null), PorterDuff.Mode.SRC_ATOP); //normal
+                        email.getBackground().setColorFilter(ResourcesCompat.getColor(getResources(), R.color.colorSecondary, null), PorterDuff.Mode.SRC_ATOP); //normal
                     }
                     else{
                         checkEmail = false;
