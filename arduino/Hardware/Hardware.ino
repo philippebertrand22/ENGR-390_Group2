@@ -114,6 +114,8 @@ bool step_toggle = true;
 bool step_toggle_walking = true;
 
 int PulseThreshold = 600;
+int bpm = 0;
+
 
 // PulseSensor stuff
 void IRAM_ATTR onSampleTime() {
@@ -184,15 +186,13 @@ void loop(){
 
     if(Firebase.ready() && signupisOk && (millis() - sendDataPrevMillis > 5000 || sendDataPrevMillis == 0) ){
       stepCount();
-      int bpm = getPulse();
+      bpm = getPulse();
+
       displayPulse(bpm);
-
-
-      //displayPulse(bpm);    
       //displaySteps();
 
 
-      //writePulseSensorDatatoFirebase(pulseSensor.getBeatsPerMinute());
+      writePulseSensorDatatoFirebase(bpm);
       writeAccelerometerDatatoFirebase();
       }    
 }
@@ -339,18 +339,15 @@ void stepCount(){
 int getPulse(){
 
 if (pulseSensor.sawStartOfBeat()) {           // Constantly test to see if "a beat happened".
-int myBPM = pulseSensor.getBeatsPerMinute();  // Calls function on our pulseSensor object that returns BPM as an "int".
-return myBPM;
+return pulseSensor.getBeatsPerMinute();  // Calls function on our pulseSensor object that returns BPM as an "int".
 }
-return 83;
+return bpm; //If there was no new beat, return the current bpm
 }
 
 void displayPulse(int beats){
   Serial.print("BPM: "); 
   Serial.println(beats); // Print the value to the serial monitor either HIGH or LOW
 }
-
-
 
 void displayGPSInfo()
 
