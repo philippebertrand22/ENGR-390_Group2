@@ -31,7 +31,7 @@ https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32
 2. Search & install **sparkfun LSM9DS1**
 3. Search & install **TinyGPSPlus**
 4. Search & install **EspSoftwareSerial**
-5. Search & install **ESP32_Pinoo**
+5. Search & install **ESP32_Pinoo** <--- Might cause errors
 6. Search & install **firebase arduino client library esp32**
 7. Search & install **PulseSensor**
 */
@@ -52,16 +52,21 @@ https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32
 #include "addons/TokenHelper.h"
 #include "addons/RTDBHelper.h"
 
+hw_timer_t * sampleTimer = NULL;
+portMUX_TYPE sampleTimerMux = portMUX_INITIALIZER_UNLOCKED;
+#define USE_ARDUINO_INTERRUPTS true    // Set-up low-level interrupts for most acurate BPM math.
+
+
 // Wifi Information
-#define WIFI_SSID "Helix.B590"   // Wifi Name
-#define WIFI_PASSWORD "11111111" // Wifi Password
+#define WIFI_SSID "zwaky"   // Wifi Name
+#define WIFI_PASSWORD "kj19cs81" // Wifi Password
 
 // Firebase Database API Key & URL
 #define API_KEY "AIzaSyA6KZ8mN_LCGyCs7N-WdnBDtY7nfDIeuvM"                     // Firebase Project API Key
 #define DATABASE_URL "https://group2-b2cc0-default-rtdb.firebaseio.com/" // FireBase Database URL
 
 // GPIO PIN for the Pulse Heart Rate Sensor
-#define PULSE_PIN 13
+#define PULSE_PIN 34
 
 // GPIO Pins for the NEO-7M GPS Module
 #define RX_GPIO_PIN 34
@@ -104,22 +109,45 @@ float accelgravityY;
 float accelgravityZ;
 
 int steps = 0;
+int steps_walking = 0;
 bool step_toggle = true;
-int PulseThreshold = 550;
+bool step_toggle_walking = true;
+
+int PulseThreshold = 600;
+int bpm = 0;
 
 
-
-
+// PulseSensor stuff
+void IRAM_ATTR onSampleTime() {
+  portENTER_CRITICAL_ISR(&sampleTimerMux);
+    PulseSensorPlayground::OurThis->onSampleTime();
+  portEXIT_CRITICAL_ISR(&sampleTimerMux);
+}
 
 void setup() {
   Serial.begin(115200);
 
-  gpsSerial.begin(GPSBaud); // Software serial initialisation
+    /*
+   ESP32 analogRead defaults to 13 bit resolution
+   PulseSensor Playground library works with 10 bit
+    */
+  analogReadResolution(10);
 
   // Configure the PulseSensor
-  pinMode(PULSE_PIN, INPUT); // Reading Input from IR_Sensor through GPIO 13
-  pulseSensor.analogInput(PULSE_PIN); // Set which pin is the analog input (default 0)
+  pinMode(PULSE_PIN, INPUT); // Reading Input from IR_Sensor through GPIO 34
+  pulseSensor.analogInput(PULSE_PIN); // Set which pin is the analog input
   pulseSensor.setThreshold(PulseThreshold);
+
+  /*
+    This will set up and start the timer interrupt on ESP32.
+    The interrupt will occur every 2000uS or 500Hz.
+  */
+  sampleTimer = timerBegin(0, 80, true);                
+  timerAttachInterrupt(sampleTimer, &onSampleTime, true);  
+  timerAlarmWrite(sampleTimer, 2000, true);      
+  timerAlarmEnable(sampleTimer);
+
+
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
@@ -138,7 +166,7 @@ void setup() {
   imu.settings.mag.enabled = false;
   imu.begin(); 
 
-
+// Setup Firebase
   config.api_key = API_KEY;
   config.database_url = DATABASE_URL;
  
@@ -155,77 +183,27 @@ void setup() {
 }
 
 void loop(){
- while (gpsSerial.available() > 0) 
-   if(gps.encode(gpsSerial.read())){
+
     if(Firebase.ready() && signupisOk && (millis() - sendDataPrevMillis > 5000 || sendDataPrevMillis == 0) ){
       stepCount();
-      int bpm = getPulse();
+      bpm = getPulse();
 
-      displayAccelInfo();
-    //displayGPSInfo();
-      displayPulse(bpm);    
+      displayPulse(bpm);
+      //displaySteps();
 
-      writeGPSDatatoFirebase();
+
       writePulseSensorDatatoFirebase(bpm);
-      stepCount();
-
-      Serial.println("DATA SUCCESSFULY STORED IN JSON FILE");
-      delay(100);
-      } else {
-           Serial.println("Error: Firebase is not ready or SignUp failed!");
-      }
-    }
-  delay(800);
-
+      writeAccelerometerDatatoFirebase();
+      }    
 }
 
 void writePulseSensorDatatoFirebase(int beats){  
   Firebase.RTDB.setInt(&fbdo, "Pulse Sensor/State", beats);
 }
 
-void writeGPSDatatoFirebase(){
-     double lat = gps.location.lat();
-     double lng = gps.location.lng();
-     double alt = gps.altitude.meters();
-
-     uint8_t month = gps.date.month();
-     uint8_t day = gps.date.day();
-     uint16_t year = gps.date.year();
-
-     uint8_t hour = gps.time.hour();
-     uint8_t min = gps.time.minute();
-     uint8_t sec = gps.time.second();
-     uint8_t centis = gps.time.centisecond();
-
-     String date = "";
-     date += String(month) + "/" + String(day) + "/" + String(year);
-
-     String time = "";
-     time +=  String(hour) + ":" + String(min) + ":" + String(sec) + ":" + String(centis);
-    
-     Firebase.RTDB.setDouble(&fbdo, "GPSData/Latitude", lat);
-     Firebase.RTDB.setDouble(&fbdo, "GPSData/Longitude", lng);
-     Firebase.RTDB.setDouble(&fbdo, "GPSData/Altitude", alt);
-     Firebase.RTDB.setString(&fbdo, "GPSData/Date", date);
-     Firebase.RTDB.setString(&fbdo, "GPSData/Time", time);
-}
-
-void writeAccelerometerDatatoFirebase(float* filter){
-
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/x", accelX);
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/y", accelY);
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/z", accelZ);
-
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter0", filter[0]);
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter1", filter[1]);
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter2", filter[2]);
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter3", filter[3]);
-        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Filter4", filter[4]);
-
+void writeAccelerometerDatatoFirebase(){
         Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Step", steps);
-
-
-        delay(10);
+        Firebase.RTDB.setFloat(&fbdo, "AccelerometerData/Acceleration/Step_walking", steps_walking);
 }
 
 void stepCount(){
@@ -246,7 +224,7 @@ void stepCount(){
   If threshold is met, increment step
   */
 
-  int sampleSize = 50; //Can change the sample size and delays to improve the algorithm
+  int sampleSize = 100; //Can change the sample size and delays to improve the algorithm
   float accel[sampleSize][3];
   float accel_along_gravity[sampleSize][3];
   float dot_product[sampleSize]; 
@@ -254,6 +232,7 @@ void stepCount(){
   float filtered_accel_low_pass[sampleSize] = {0.0};
 
   float threshold = 0.09;
+  float threshold_walking = 0.05;
 
   // Initialize first two rows of new array to 0;
   for (int i = 0; i <= 1 ; i++){ 
@@ -262,7 +241,6 @@ void stepCount(){
       }    
     }
 
-  // IIR alpha and beta coefficients from the internet
   float coefficients_low_pass_0Hz[] = {-1.979133761292768, 0.979521463540373, 0.000086384997973502, 0.000172769995947004, 0.000086384997973502};
   float coefficients_low_pass_5Hz[] = {0.095465967120306, -0.172688631608676, 0.095465967120306, -1.80898117793047, 0.827224480562408};
   float coefficients_high_pass_1Hz[] = {0.953986986993339, -1.907503180919730, 0.953986986993339, -1.905384612118461, 0.910092542787947};
@@ -272,9 +250,9 @@ void stepCount(){
 
      imu.readAccel();
 
-    accel[i][0] = accelX = imu.ax;  
-    accel[i][1] = accelY = imu.ay;  
-    accel[i][2] = accelZ = imu.az + 1.0;  // Undoing the calibration in readAccel()
+    accel[i][0] = (imu.calcAccel(imu.ax));
+    accel[i][1] = (imu.calcAccel(imu.ay));
+    accel[i][2] = (imu.calcAccel(imu.az)); 
 
     delay(10);
   }
@@ -293,10 +271,10 @@ void stepCount(){
       }
   }
 
-  // Subtract gravity from raw acceleration to get user acceleration
+  // Combine gravity from raw acceleration to get user acceleration
   for (int i = 2; i < sampleSize ; i++){ 
     for(int j = 0; j < 3; j++){
-      accel[i][j] -= accel_along_gravity[i][j];     
+      accel[i][j] += accel_along_gravity[i][j];     
     }
   }
 
@@ -329,7 +307,7 @@ void stepCount(){
       filtered_accel[i-2]             * coefficients_high_pass_1Hz[4]
       );}
 
-  // Count steps
+  // Count steps for running
   for (int i = 1; i < sampleSize; i++){
 
   // Only increments if crossing the threshold in the positive direction
@@ -342,34 +320,28 @@ void stepCount(){
   if ((filtered_accel[i] < 0) && (filtered_accel[i-1] >=0)) step_toggle = true;
   }
 
-  writeAccelerometerDatatoFirebase(filtered_accel);
+  // Count steps for walking
+  for (int i = 1; i < sampleSize; i++){
 
-Serial.println("Raw Acceleration pointing down");
-Serial.print(
-  String(dot_product[0]) + ", " +
-  String(dot_product[1]) + ", " +
-  String(dot_product[2]) + ", " +
-  String(dot_product[3]) + ", " +
-  String(dot_product[4]));
+  // Only increments if crossing the threshold in the positive direction
+  if ((filtered_accel[i] >= threshold_walking) && (filtered_accel[i-1] < threshold_walking) && (step_toggle_walking == true) ){
+    steps_walking++;
+    step_toggle_walking = false;
+  }
+
+  // Can only reset the toggle if the acceleration crossed the 0 in the negative direction
+  if ((filtered_accel[i] < 0) && (filtered_accel[i-1] >=0)) step_toggle_walking = true;
+  }
 
 
-Serial.println("\nFiltered Acceleration pointing down");
-Serial.print(
-  String(filtered_accel[0]) + ", " +
-  String(filtered_accel[1]) + ", " +
-  String(filtered_accel[2]) + ", " +
-  String(filtered_accel[3]) + ", " +
-  String(filtered_accel[4]));
 }
-
 
 int getPulse(){
 
 if (pulseSensor.sawStartOfBeat()) {           // Constantly test to see if "a beat happened".
-int myBPM = pulseSensor.getBeatsPerMinute();  // Calls function on our pulseSensor object that returns BPM as an "int".
-return myBPM;
+return pulseSensor.getBeatsPerMinute();  // Calls function on our pulseSensor object that returns BPM as an "int".
 }
-
+return bpm; //If there was no new beat, return the current bpm
 }
 
 void displayPulse(int beats){
@@ -377,22 +349,9 @@ void displayPulse(int beats){
   Serial.println(beats); // Print the value to the serial monitor either HIGH or LOW
 }
 
-void displayAccelInfo() {
- 
-  Serial.println();
-  Serial.println("Acceleration:");
-  Serial.print("X: ");
-  Serial.print(accelX);
-  Serial.print("||");
-  Serial.print("Y: ");
-  Serial.print(accelY);
-  Serial.print("||");
-  Serial.print("Z: ");
-  Serial.print(accelZ);
-  Serial.print("||");
-}
-
 void displayGPSInfo()
+
+
 {
   if (gps.location.isValid())
   {
@@ -448,4 +407,12 @@ void displayGPSInfo()
   {
     Serial.println("Not Available");
   }
+}
+
+void displaySteps(){
+
+  Serial.print("Steps Walking: ");   
+  Serial.print(steps_walking); 
+  Serial.print("\t Steps Running: ");   
+  Serial.println(steps); 
 }
