@@ -7,6 +7,41 @@
     android:background="#FFFFFF"
     tools:context=".LoginPage">
 
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="72dp"
+        android:layout_height="55dp"
+        android:fontFamily="@font/poppins_bold"
+        android:text="Run"
+        android:textAlignment="textStart"
+        android:textColor="#1D1617"
+        android:textSize="34sp"
+        android:textStyle="italic"
+        android:translationZ="90dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.18"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.068" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="147dp"
+        android:layout_height="55dp"
+        android:fontFamily="@font/poppins_bold"
+        android:text="Master"
+        android:textColor="#FFEBEE"
+        android:textSize="34sp"
+        android:textStyle="italic"
+        android:translationZ="90dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.068" />
+
     <ImageView
         android:id="@+id/image5View"
         android:layout_width="588dp"

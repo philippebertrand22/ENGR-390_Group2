@@ -60,7 +60,7 @@ import java.util.TimerTask;
 
 public class homeActivity extends AppCompatActivity implements EventListener, OnMapReadyCallback {
     private static final int REQUEST_CODE = 99;
-    private Button startRunning, steps, graph;
+    private Button startRunning, graph;
 
     private static final String TAG = homeActivity.class.getSimpleName();
     private GoogleMap map;
@@ -144,13 +144,6 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
             }
         });
 
-        steps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(StepsActivity.class);
-            }
-        });
-
         graph.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -167,7 +160,6 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
     private void setupUI() {
         startRunning = findViewById(R.id.startRunningButtonID);
         graph = findViewById(R.id.graph_btn);
-        steps = findViewById(R.id.StepsButton);
     }
     //this function creates the map and the current location marker
     @Override

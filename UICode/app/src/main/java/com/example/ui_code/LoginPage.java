@@ -28,7 +28,7 @@ public class LoginPage extends AppCompatActivity {
 
     private EditText email, password;
 
-    private TextView register_link;
+    private TextView register_link, run, master;
 
     private UserInfo user;
 
@@ -54,6 +54,8 @@ public class LoginPage extends AppCompatActivity {
         password = findViewById(R.id.password);
         Button = findViewById(R.id.button3);
         register_link = findViewById(R.id.textView12);
+        run = findViewById(R.id.textView2);
+        master = findViewById(R.id.textView3);
     }
 
     private void onClickListeners() {
