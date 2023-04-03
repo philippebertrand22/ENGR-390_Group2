@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,9 +26,9 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.List;
 import java.util.ArrayList;
 
 public class summaryActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -71,7 +70,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
         userKey = user.getUid(); // Userkey is unique to whoever logged in
     }
-
+//This is a test
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         pathMap = map;
@@ -151,4 +150,20 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                 return super.onOptionsItemSelected(item);
         }
     }
+    private FirebaseAuth mAuth;
+    private FirebaseUser user;
+    private DatabaseReference reference;
+
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference("weight");
+
+    public void CaloriesBurned(DataSnapshot dataSnapshot){
+        int weight = dataSnapshot.child("weight").getValue(Integer.class);
+
+        double CaloriesBurned =  ((11.6 * 3.5 * Float.parseFloat(String.valueOf(weight))) / 200);
+
+        TextView resultTextView = findViewById(R.id.resultCalBurned);
+        resultTextView.setText(String.valueOf(CaloriesBurned));
+    }
+
 }
