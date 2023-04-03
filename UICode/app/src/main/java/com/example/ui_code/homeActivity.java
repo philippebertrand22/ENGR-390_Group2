@@ -60,16 +60,12 @@ import java.util.TimerTask;
 
 public class homeActivity extends AppCompatActivity implements EventListener, OnMapReadyCallback {
     private static final int REQUEST_CODE = 99;
-    private Button startRunning, steps, graph;
-    private TextView Pulse, Longitude, Latitude, Altitude, Date, Time, Step;
+    private Button startRunning, graph;
 
     private static final String TAG = homeActivity.class.getSimpleName();
     private GoogleMap map;
-
     public double locationLatitude;
     public double locationLongitude;
-    private DatabaseReference databaseGPSReference, databasePulseReference, databaseStepReference;
-
     private FirebaseAuth mAuth;
 
     private FirebaseUser user;
@@ -86,13 +82,8 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        Latitude.setText(String.valueOf(locationLatitude));
-//        Longitude.setText((int) locationLongitude);
-
-
         setupUI();
         onClickListeners();
-
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
@@ -140,8 +131,8 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
                 if(location != null){
 
                     //THESE GET CURRENT LOCATION
-                    Latitude.setText(String.valueOf(location.getLatitude()));
-                    Longitude.setText(String.valueOf(location.getLongitude()));
+//                    Latitude.setText(String.valueOf(location.getLatitude()));
+//                    Longitude.setText(String.valueOf(location.getLongitude()));
                     locationLatitude = location.getLatitude();
                     locationLongitude = location.getLongitude();
 
@@ -150,13 +141,6 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
                     map.addMarker(new MarkerOptions().position(here).title("Marker").icon(BitmapFromVector(getApplicationContext(), R.drawable.baseline_circle_24)));
                     moveToCurrentLocation(here);
                 }
-            }
-        });
-
-        steps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(StepsActivity.class);
             }
         });
 
@@ -176,94 +160,6 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
     private void setupUI() {
         startRunning = findViewById(R.id.startRunningButtonID);
         graph = findViewById(R.id.graph_btn);
-        steps = findViewById(R.id.StepsButton);
-        Pulse = findViewById(R.id.Pulse);
-        Longitude = findViewById(R.id.latitude);
-        Latitude = findViewById(R.id.longitude);
-        Altitude = findViewById(R.id.altitude);
-        Date = findViewById(R.id.date);
-        Time = findViewById(R.id.time);
-        Step = findViewById(R.id.step);
-
-        databasePulseReference = FirebaseDatabase.getInstance().getReference("Pulse Sensor/");
-
-        databasePulseReference.child("State").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String output = "Pulse detected : " + dataSnapshot.getValue().toString();
-                    Pulse.setText(output);
-                }
-            }
-        });
-
-        databaseStepReference = FirebaseDatabase.getInstance().getReference("AccelerometerData/Acceleration/");
-
-        databaseStepReference.child("Step").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String output = "Step : " + dataSnapshot.getValue().toString();
-                    Step.setText(output);
-                }
-            }
-        });
-
-        databaseGPSReference = FirebaseDatabase.getInstance().getReference("GPSData/");
-
-//        databaseGPSReference.child("Latitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-//            @Override
-//            public void onSuccess(DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.exists()) {
-//                    String output = "Latitude : " + dataSnapshot.getValue().toString();
-//                    Latitude.setText(output);
-//                    String latitude = dataSnapshot.getValue().toString();
-//                    locationLatitude = Double.parseDouble(latitude);
-//                }
-//            }
-//        });
-//
-//        databaseGPSReference.child("Longitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-//            @Override
-//            public void onSuccess(DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.exists()) {
-//                    String output = "Longitude : " + dataSnapshot.getValue().toString();
-//                    Longitude.setText(output);
-//                    String longitude = dataSnapshot.getValue().toString();
-//                    locationLatitude = Double.parseDouble(longitude);
-//                }
-//            }
-//        });
-
-        databaseGPSReference.child("Altitude").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String output = "Altitude : " + dataSnapshot.getValue().toString();
-                    Altitude.setText(output);
-                }
-            }
-        });
-
-        databaseGPSReference.child("Date").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String output = "Date : " + dataSnapshot.getValue().toString();
-                    Date.setText(output);
-                }
-            }
-        });
-
-        databaseGPSReference.child("Time").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        String output = "Time : " + snapshot.getValue().toString();
-                        Time.setText(output);
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
-        });
     }
     //this function creates the map and the current location marker
     @Override
@@ -312,6 +208,7 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
                 return true;
             case R.id.logout:
                 // go to logout
+                mAuth.signOut();
                 startActivity(LoginPage.class);
                 return true;
             default:
