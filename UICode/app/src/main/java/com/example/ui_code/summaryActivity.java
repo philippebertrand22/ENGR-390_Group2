@@ -150,8 +150,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                 return super.onOptionsItemSelected(item);
         }
     }
-    private FirebaseAuth mAuth;
-    private FirebaseUser user;
+ 
     private DatabaseReference reference;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -163,7 +162,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         double CaloriesBurned =  ((11.6 * 3.5 * Float.parseFloat(String.valueOf(weight))) / 200);
 
         TextView resultTextView = findViewById(R.id.resultCalBurned);
-        resultTextView.setText(String.valueOf(CaloriesBurned));
+        resultTextView.setText("Calories Burned: " + String.valueOf(CaloriesBurned));
     }
 
 }
