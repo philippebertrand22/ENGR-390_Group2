@@ -394,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
                         previousLng = longitude;
 
                         distance = previousLocation.distanceTo(location);
-                        distanceValue.setText(String.valueOf(distance) + " meters");
+                        distanceValue.setText(String.valueOf((int)distance) + " meters");
                     }
                     else{
                         latitude = location.getLatitude();

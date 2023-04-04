@@ -29,16 +29,17 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
 public class summaryActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     GoogleMap pathMap;
-    TextView text, text8;
+    TextView text, text8, resultTextView;
     Button  button;
     
-    private DatabaseReference databaseLocationReference;
+    private DatabaseReference databaseLocationReference, databaseWeightReference;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private String userKey;
@@ -56,6 +57,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         setContentView(R.layout.activity_summary);
         setupUI();
         findLatLng();
+        CaloriesBurned();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -65,67 +67,86 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         text = findViewById(R.id.textView);
         button = findViewById(R.id.button);
         text8 = findViewById(R.id.textView8);
-
+        resultTextView = findViewById(R.id.resultCalBurned);
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
         userKey = user.getUid(); // Userkey is unique to whoever logged in
+        databaseWeightReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey);
     }
 //This is a test
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         pathMap = map;
     }
-
     private void findLatLng() {
         databaseLocationReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
-        PolylineOptions path = new PolylineOptions().width(8).color(Color.RED);
+        PolylineOptions path = new PolylineOptions();
 
         databaseLocationReference.child("entry_count").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
+                if (dataSnapshot.exists()) {
                     entry_count = Integer.parseInt(dataSnapshot.getValue().toString());
                 }
             }
         });
 
-
-            databaseLocationReference.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-                @Override
-                public void onSuccess(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                            String data_string = snapshot.getValue().toString();
-                            if(data_string.length() > 4) {
-                                Latitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']'))));
-                                Longitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}'))));
-                            }
+        databaseLocationReference.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        String data_string = snapshot.getValue().toString();
+                        if (data_string.length() > 4) {
+                            Latitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']'))));
+                            Longitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}'))));
                         }
                     }
                 }
-            });
-        for(int n = 0;n < Latitudes.size(); n++){
-            LatLng location = new LatLng(Latitudes.get(n), Longitudes.get(n));
-            Locations.add(location);
- //           path.add(Locations.get(n));
+            }
+        });
+        LatLng locations = null;
+        for (int n = 0; n < Latitudes.size(); n++) {
+            locations = new LatLng(Latitudes.get(n), Longitudes.get(n));
+        }
+        path = path.color(Color.RED);
+        path = path.width(8);
+        //use these as example to show feature
+        path = path.add(new LatLng(45.3685642, -73.981979));
+        path = path.add(new LatLng(45.368895, -73.980917));
+        path = path.add(new LatLng(45.368567, -73.979796));
+        path = path.add(new LatLng(45.368005, -73.980864));
+        path = path.add(new LatLng(45.36758727681062, -73.98175357408874));
+        path = path.add(new LatLng(45.365683999463634, -73.98093281819594));
+        path = path.add(new LatLng(45.364221635949875, -73.97848664348376));
+        path = path.add(new LatLng(45.36518649859342, -73.97642670688406));
+        path = path.add(new LatLng(45.36601566427978, -73.97477446606969));
+        path = path.add(new LatLng(45.3676136584105, -73.9749246697801));
+        path = path.add(new LatLng(45.36880458694109, -73.97672711430485));
+        path = path.add(new LatLng(45.36915884565252, -73.9791518313441));
+        path = path.add(new LatLng(45.368601075614094, -73.97974728176744));
+
+        if (path != null) {
+//            Polyline polyline = pathMap.addPolyline(path);
+//            pathMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.3685642, -73.981979), 17));
         }
 
-        path.add(new LatLng(45.3685642, -73.981979));
-        path.add(new LatLng(45.368895, -73.980917));
-//        path.add(new LatLng(45.368567, -73.979796));
-//        path.add(new LatLng(45.368005, -73.980864));
+        refreshFragment();
 
+        PolylineOptions finalPath = path;
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               Polyline polyline = pathMap.addPolyline(path);
-                pathMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.3685642, -73.981979), 17));
-                Toast.makeText(view.getContext(), "ADDING PATH", Toast.LENGTH_SHORT).show();
+                Polyline polyline = pathMap.addPolyline(finalPath);
+                pathMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.368567, -73.979796), 16));
             }
         });
     }
-
+    private void refreshFragment(){
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+    }
     private void startActivity(Class<?> destinationActivity) {
         Intent intent = new Intent(this, destinationActivity);
         startActivity(intent);
@@ -152,18 +173,16 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         }
     }
 
-    private DatabaseReference reference;
-
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference("weight");
-
-    public void CaloriesBurned(DataSnapshot dataSnapshot){
-        int weight = dataSnapshot.child("weight").getValue(Integer.class);
-
-        double CaloriesBurned =  ((11.6 * 3.5 * Float.parseFloat(String.valueOf(weight))) / 200);
-
-        TextView resultTextView = findViewById(R.id.resultCalBurned);
-        resultTextView.setText(String.valueOf(CaloriesBurned));
+    private void CaloriesBurned(){
+        databaseWeightReference.child("weight").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                    String output = dataSnapshot.getValue().toString();
+                    text.setText(dataSnapshot.getValue().toString());
+                    double weight = Double.parseDouble(output);
+                    double CaloriesBurned =  (11.6 * 3.5 * weight) / 200;
+                    resultTextView.setText(String.valueOf(CaloriesBurned));
+            }
+        });
     }
-
 }
