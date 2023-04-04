@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private double longitude, latitude, previousLng, previousLat;
 
     private Location previousLocation;
-    private float distance, newDistance;
+    private float distance;
 
     private LatLng here;
     private String step;
@@ -198,8 +198,6 @@ public class MainActivity extends AppCompatActivity {
         timeText = findViewById(R.id.timeTextID);
         distanceText = findViewById(R.id.distanceTextID);
         distanceValue = findViewById(R.id.distanceValueID);
-        speedValue = findViewById(R.id.speedValueID);
-        speedText = findViewById(R.id.speedTextID);
         BPMValue = findViewById(R.id.BPMValueID);
         BPMText = findViewById(R.id.BPMTextID);
         stepText = findViewById(R.id.stepTextID);
@@ -346,7 +344,8 @@ public class MainActivity extends AppCompatActivity {
                 + " | HeartBeat: " + bpm
                 + " | Steps: " + step
                 + " | Latitude: [" + latitude
-                + "] | Longitude: {" + longitude) + "}";
+                + "] | Longitude: {" + longitude
+                + "} | Distance: " + distance);
     }
 
     private void sendGPS() {
@@ -398,8 +397,10 @@ public class MainActivity extends AppCompatActivity {
                         distanceValue.setText(String.valueOf(distance) + " meters");
                     }
                     else{
-                        distance = previousLocation.distanceTo(location) + distance;
-                        distanceValue.setText(String.valueOf(distance) + " meters");
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
+                        distance = previousLocation.distanceTo(location) + (int)distance;
+                        distanceValue.setText(String.valueOf((int)distance) + " meters");
 
                         previousLocation = location;
                     }

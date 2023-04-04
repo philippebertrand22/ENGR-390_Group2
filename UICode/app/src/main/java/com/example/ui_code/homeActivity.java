@@ -144,13 +144,6 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
             }
         });
 
-        graph.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(GraphPage.class);
-            }
-        });
-
     }
     private void startActivity(Class<?> destinationActivity) {
         Intent intent = new Intent(this, destinationActivity);
@@ -159,7 +152,6 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
 
     private void setupUI() {
         startRunning = findViewById(R.id.startRunningButtonID);
-        graph = findViewById(R.id.graph_btn);
     }
     //this function creates the map and the current location marker
     @Override

@@ -11,28 +11,26 @@
         android:layout_width="415dp"
         android:layout_height="680dp"
         android:background="@drawable/rectangle"
-        android:backgroundTint="#E6D1F2"
+        android:backgroundTint="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.153"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.995" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <ImageView
-        android:id="@+id/image22View"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:id="@+id/image5View"
+        android:layout_width="588dp"
+        android:layout_height="482dp"
         android:adjustViewBounds="true"
         android:background="@drawable/ic_launcher_foreground"
         android:keepScreenOn="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
-        app:srcCompat="@drawable/img_2" />
+        app:layout_constraintVertical_bias="0"
+        app:srcCompat="@drawable/img_5" />
 
     <ImageView
         android:id="@+id/image2View"
@@ -43,65 +41,40 @@
         android:keepScreenOn="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.869"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.72"
+        app:layout_constraintVertical_bias="0.858"
         app:srcCompat="@drawable/img_2" />
 
     <TextView
         android:id="@+id/BMI"
-        android:layout_width="60dp"
-        android:layout_height="44dp"
-        android:layout_marginStart="323dp"
-        android:layout_marginTop="374dp"
-        android:layout_marginRight="5dp"
+        android:layout_width="61dp"
+        android:layout_height="27dp"
         android:text="BMI"
+        android:textAlignment="center"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.777"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        />
-
-    <TextView
-        android:id="@+id/step"
-        android:layout_width="60dp"
-        android:layout_height="44dp"
-        android:layout_marginStart="320dp"
-        android:layout_marginTop="502dp"
-        android:text="Step"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintVertical_bias="0.75" />
 
     <Button
         android:id="@+id/startRunningButtonID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="#92A3FD"
-        android:text="Start"
+        android:text="Start Running"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.229"
+        app:layout_constraintHorizontal_bias="0.164"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.673" />
-
-    <Button
-        android:id="@+id/graph_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#92A3FD"
-        android:text="Graph"
-        android:textColor="#FFFFFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.229"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.814" />
+        app:layout_constraintVertical_bias="0.776" />
 
     <fragment
         android:id="@+id/map"

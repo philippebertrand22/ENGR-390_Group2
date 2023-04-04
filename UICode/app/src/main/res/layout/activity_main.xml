@@ -25,30 +25,30 @@
         android:layout_height="wrap_content"
         android:text="BPM"
         android:textAllCaps="true"
-        android:textColor = "?android:textColorPrimary"
+        android:textColor="?android:textColorPrimary"
         android:textSize="28sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
+        app:layout_constraintHorizontal_bias="0.74"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.695" />
+        app:layout_constraintVertical_bias="0.702" />
 
     <TextView
         android:id="@+id/BPMValueID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="BPM"
-        android:textStyle="bold"
         android:textAllCaps="true"
-        android:textColor = "?android:textColorPrimary"
+        android:textColor="?android:textColorPrimary"
         android:textSize="35sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
+        app:layout_constraintHorizontal_bias="0.74"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.589" />
+        app:layout_constraintVertical_bias="0.588" />
 
     <TextView
         android:id="@+id/distanceTextID"
@@ -109,11 +109,12 @@
         app:layout_constraintVertical_bias="0.233" />
 
     <View
+        android:id="@+id/view2"
         android:layout_width="320dp"
         android:layout_height="2dp"
-        android:background="#635FC6"
-        android:layout_marginTop="170dp"
         android:layout_marginLeft="20dp"
+        android:layout_marginTop="170dp"
+        android:background="#635FC6"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -137,86 +138,47 @@
         app:layout_constraintVertical_bias="0.112" />
 
     <TextView
-        android:id="@+id/speedTextID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speed"
-        android:textAllCaps="true"
-        android:textColor = "?android:textColorPrimary"
-        android:textSize="28sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.10"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.695" />
-
-    <TextView
-        android:id="@+id/speedValueID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speed"
-        android:textStyle="bold"
-        android:textAllCaps="true"
-        android:textColor = "?android:textColorPrimary"
-        android:textSize="35sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.10"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.589" />
-
-    <TextView
         android:id="@+id/stepTextID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Steps"
         android:textAllCaps="true"
-        android:textColor = "?android:textColorPrimary"
+        android:textColor="?android:textColorPrimary"
         android:textSize="28sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.52"
+        app:layout_constraintHorizontal_bias="0.217"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.695" />
+        app:layout_constraintVertical_bias="0.702" />
 
     <View
+        android:id="@+id/view"
         android:layout_width="2dp"
         android:layout_height="90dp"
         android:background="#635FC6"
-        android:layout_marginTop="345dp"
-        android:layout_marginLeft="145dp"
+        app:layout_constraintBottom_toBottomOf="@+id/image8View"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginRight="30dp"/>
-
-    <View
-        android:layout_width="2dp"
-        android:layout_height="90dp"
-        android:background="#635FC6"
-        android:layout_marginTop="345dp"
-        android:layout_marginLeft="285dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginRight="30dp"/>
+        app:layout_constraintVertical_bias="0.633" />
 
     <TextView
         android:id="@+id/stepValueID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Steps"
-        android:textStyle="bold"
         android:textAllCaps="true"
-        android:textColor = "?android:textColorPrimary"
+        android:textColor="?android:textColorPrimary"
         android:textSize="35sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.52"
+        app:layout_constraintHorizontal_bias="0.217"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.589" />
+        app:layout_constraintVertical_bias="0.588" />
 
     <View
         android:id="@+id/myRectangleView"
