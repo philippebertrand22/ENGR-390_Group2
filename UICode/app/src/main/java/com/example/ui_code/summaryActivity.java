@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -150,8 +151,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                 return super.onOptionsItemSelected(item);
         }
     }
-    private FirebaseAuth mAuth;
-    private FirebaseUser user;
+
     private DatabaseReference reference;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
