@@ -341,11 +341,11 @@ public class MainActivity extends AppCompatActivity {
         return("Date: " + date
                 + " | Time: " + currentTime
                 + " | Running Time: " + currentActivityTime
-                + " | HeartBeat: !" + bpm
-                + "? | Steps: " + step
-                + " | Latitude: [" + latitude
-                + "] | Longitude: {" + longitude
-                + "} | Distance: <" + distance + ">");
+                + " | HeartBeat: " + bpm
+                + " | Steps: " + step
+                + " | Latitude: " + latitude
+                + " | Longitude: " + longitude
+                + " | Distance: " + distance);
     }
 
     private void sendGPS() {

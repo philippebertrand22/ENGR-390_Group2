@@ -20,12 +20,14 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.ValueEventListener;
 import com.jjoe64.graphview.GraphView;
 
 import java.util.EventListener;
@@ -38,12 +40,16 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
     Button  button;
     private Button HBEAT;
     GraphView graphView;
-    private DatabaseReference databaseUserReference, databaseWeightReference, databaseStepsReference, databasePulseReference;
+    private DatabaseReference databaseUserReference, databaseWeightReference, databaseStepsReference, databasePulseReference, currentActivityReference;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private String userKey;
     private double avg_hb;
     private int entry_count;
+
+    private long totalEntries;
+
+    private ArrayList<String> dateArray, timeArray, runningTimeArray, heartBeatArray, stepsArray, latitudeArray, longitudeArray, distanceArray;
 
     ArrayList<Double> Heartbeats = new ArrayList<>();
     ArrayList<LatLng> Locations = new ArrayList<>();
@@ -53,13 +59,12 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
 
-
         setupUI();
-        findLatLng();
-        CaloriesBurned();
-        HeartBeat();
-        TotalSteps();
-        TotalDistance();
+        //findLatLng();
+        //CaloriesBurned();
+        //HeartBeat();
+        //TotalSteps();
+        //TotalDistance();
 
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -67,6 +72,8 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     private void setupUI() {
+        totalEntries = 0; // Stores the number of entries in the current activity
+
         text = findViewById(R.id.textView);
         button = findViewById(R.id.button);
         text8 = findViewById(R.id.textView8);
@@ -76,19 +83,104 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         distanceTextView = findViewById(R.id.resultTotalDistance);
         HBEAT = findViewById(R.id.btn);
         graphView = findViewById(R.id.graph);
-        databasePulseReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
-        databaseStepsReference = FirebaseDatabase.getInstance().getReference("AccelerometerData/Acceleration");
+
+
+        dateArray = new ArrayList<>();
+        timeArray = new ArrayList<>();
+        runningTimeArray = new ArrayList<>();
+        heartBeatArray = new ArrayList<>();
+        stepsArray = new ArrayList<>();
+        latitudeArray = new ArrayList<>();
+        longitudeArray = new ArrayList<>();
+        distanceArray = new ArrayList<>();
+
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
         userKey = user.getUid(); // Userkey is unique to whoever logged in
+
+        currentActivityReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
+
+        databasePulseReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
+        databaseStepsReference = FirebaseDatabase.getInstance().getReference("AccelerometerData/Acceleration");
         databaseWeightReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey);
+
+        getData(currentActivityReference, new OnDataRetrievedListener() {
+            //Call getDate. Gets a string array
+            //Then call parseData to split it into individual arrays
+            @Override
+            public void onDataRetrieved(ArrayList<String> data) {
+                parseData(data);
+            }
+        });
+
+
     }
 //This is a test
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         pathMap = map;
     }
+
+
+// Interface to handle retrieved data
+    public interface OnDataRetrievedListener {
+        void onDataRetrieved(ArrayList<String> data);
+    }
+
+    private void getData(DatabaseReference databaseReference, final OnDataRetrievedListener listener) {
+        final ArrayList<String> data = new ArrayList<>();
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChildren()) {
+                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                        String key = childSnapshot.getKey();
+                        Object value = childSnapshot.getValue();
+                        if (key != null && key.equals("entry_count") && value instanceof Long) {
+                            totalEntries = (Long) value;
+                            System.out.println("Total Entries: " + totalEntries);
+                        } else {
+                            // Assuming each child entry contains a string value
+                            String stringValue = childSnapshot.getValue(String.class);
+                            System.out.println("Entry: " + stringValue);
+                            if (stringValue != null) {
+                                data.add(stringValue);
+                            }
+                        }
+                    }
+                    // Call the listener with the retrieved data
+                    listener.onDataRetrieved(data);
+                } else {
+                    // Handle case where there are no child entries
+                    System.out.println("No child entries found in dataSnapshot");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle any error that occurred during data retrieval
+                System.out.println("Error: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    private void parseData(ArrayList<String> data) {
+
+        for (String entry : data) {
+            String[] fields = entry.split(" \\| ");
+            dateArray.add(fields[0].substring(6)); // remove "Date: " prefix
+            timeArray.add(fields[1].substring(6)); // remove "Time: " prefix
+            runningTimeArray.add(fields[2].substring(14)); // remove "Running Time: " prefix
+            heartBeatArray.add(fields[3].substring(11)); // remove "HeartBeat: " prefix
+            stepsArray.add(fields[4].substring(7)); // remove "Steps: " prefix
+            latitudeArray.add(fields[5].substring(11)); // remove "Latitude: " prefix
+            longitudeArray.add(fields[6].substring(12)); // remove "Longitude: " prefix
+            distanceArray.add(fields[7].substring(10)); // remove "Distance: " prefix
+        }
+    }
+
+
     private void findLatLng() {
         databaseUserReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
         PolylineOptions path = new PolylineOptions();
