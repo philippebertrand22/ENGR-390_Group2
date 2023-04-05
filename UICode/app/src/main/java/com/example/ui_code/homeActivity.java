@@ -94,7 +94,7 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
 
         setupUI();
         onClickListeners();
-        //calculateBMI();
+       // calculateBMI();
     }
 
     private void onClickListeners() {
@@ -189,8 +189,8 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
     }
     private void setupUI() {
         startRunning = findViewById(R.id.startRunningButtonID);
-        BMI = findViewById(R.id.BMI);
-        BMI2 = findViewById(R.id.BMI2);
+       // BMI = findViewById(R.id.BMI);
+      //  BMI2 = findViewById(R.id.BMI2);
     }
 
     //this function creates the map and the current location marker
