@@ -53,14 +53,12 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
 
-
         setupUI();
         findLatLng();
         CaloriesBurned();
         HeartBeat();
         TotalSteps();
         TotalDistance();
-
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -84,6 +82,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         userKey = user.getUid(); // Userkey is unique to whoever logged in
         databaseWeightReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey);
     }
+
 //This is a test
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
