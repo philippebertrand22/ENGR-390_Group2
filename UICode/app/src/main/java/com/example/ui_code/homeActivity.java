@@ -94,7 +94,7 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
 
         setupUI();
         onClickListeners();
-        calculateBMI();
+        //calculateBMI();
     }
 
     private void onClickListeners() {

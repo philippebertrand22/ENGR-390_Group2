@@ -49,10 +49,19 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
 
     private long totalEntries;
 
-    private ArrayList<String> dateArray, timeArray, runningTimeArray, heartBeatArray, stepsArray, latitudeArray, longitudeArray, distanceArray;
+ //   private ArrayList<String> dateArray, timeArray, runningTimeArray, heartBeatArray, stepsArray, latitudeArray, longitudeArray, distanceArray;
 
     ArrayList<Double> Heartbeats = new ArrayList<>();
     ArrayList<LatLng> Locations = new ArrayList<>();
+
+   ArrayList<String> dateArray = new ArrayList<>();
+   ArrayList<String> timeArray = new ArrayList<>();
+   ArrayList<String> runningTimeArray = new ArrayList<>();
+   ArrayList<String> heartBeatArray = new ArrayList<>();
+   ArrayList<String> stepsArray = new ArrayList<>();
+   ArrayList<String> latitudeArray = new ArrayList<>();
+   ArrayList<String> longitudeArray = new ArrayList<>();
+   ArrayList<String> distanceArray = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +69,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         setContentView(R.layout.activity_summary);
 
         setupUI();
+        displayData();
         //findLatLng();
         //CaloriesBurned();
         //HeartBeat();
@@ -82,16 +92,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         distanceTextView = findViewById(R.id.resultTotalDistance);
         HBEAT = findViewById(R.id.btn);
         graphView = findViewById(R.id.graph);
-
-
-        dateArray = new ArrayList<>();
-        timeArray = new ArrayList<>();
-        runningTimeArray = new ArrayList<>();
-        heartBeatArray = new ArrayList<>();
-        stepsArray = new ArrayList<>();
-        latitudeArray = new ArrayList<>();
-        longitudeArray = new ArrayList<>();
-        distanceArray = new ArrayList<>();
 
 
         mAuth = FirebaseAuth.getInstance();
@@ -177,7 +177,40 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
             latitudeArray.add(fields[5].substring(11)); // remove "Latitude: " prefix
             longitudeArray.add(fields[6].substring(12)); // remove "Longitude: " prefix
             distanceArray.add(fields[7].substring(10)); // remove "Distance: " prefix
+
+
         }
+
+        // Step
+        if (stepsArray != null && stepsArray.size() > 0) {
+            int lastIndex = stepsArray.size() - 1;
+            String lastStep = stepsArray.get(lastIndex);
+            stepsTextView.setText("Total Steps: " + lastStep);
+        }
+
+        // Distance
+        if (distanceArray != null && distanceArray.size() > 0) {
+            int lastIndex = distanceArray.size() - 1;
+            String lastStep = distanceArray.get(lastIndex);
+            distanceTextView.setText("Total Distance: " + lastStep);
+        }
+
+        // Distance
+        if (distanceArray != null && distanceArray.size() > 0) {
+            int lastIndex = distanceArray.size() - 1;
+            String lastStep = distanceArray.get(lastIndex);
+            distanceTextView.setText("Total Distance: " + lastStep);
+        }
+
+        resultTextView.setVisibility(View.GONE);
+        heartbeat_text.setVisibility(View.GONE);
+        text.setVisibility(View.GONE);
+
+
+
+    }
+
+    private void displayData(){
     }
 
 
