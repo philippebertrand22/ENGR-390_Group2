@@ -64,11 +64,18 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
 
     private static final String TAG = homeActivity.class.getSimpleName();
     private GoogleMap map;
-    public double locationLatitude;
-    public double locationLongitude;
-    private FirebaseAuth mAuth;
+    public double locationLatitude, locationLongitude;
 
+    private double bmi, weight, height;
+
+    private int Weight, Height;
+
+    private TextView BMI;
+    private FirebaseAuth mAuth;
     private FirebaseUser user;
+    private String userKey;
+
+    private DatabaseReference databaseUserReference;
 
     private FusedLocationProviderClient fusedLocationClient;
 
@@ -84,9 +91,12 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
 
         setupUI();
         onClickListeners();
+     //   calculateBMI();
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
+        userKey = user.getUid(); // Userkey is unique to whoever logged in
+        databaseUserReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey);
     }
 
     private void onClickListeners() {
@@ -150,16 +160,60 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
         startActivity(intent);
     }
 
+    //TODO FIX THIS FUNCTION
+//    private void calculateBMI(){
+//        databaseUserReference.child("weight").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+//            @Override
+//            public void onSuccess(DataSnapshot dataSnapshot) {
+//            String output = (String) dataSnapshot.getValue();
+//            BMI.setText(output);
+//            //weight = Double.parseDouble(output);
+//            }
+//        });
+//        databaseUserReference.child("height").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+//            @Override
+//            public void onSuccess(DataSnapshot dataSnapshot) {
+//            String output = dataSnapshot.getValue().toString();
+//            height = Double.parseDouble(output);
+//            }
+//        });
+//        bmi = weight/((height)*(height));
+//        BMI.setText("Your BMI is: " + bmi);
+//        databaseUserReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey);
+//
+//        databaseUserReference.child("weight").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+//            @Override
+//            public void onSuccess(DataSnapshot dataSnapshot) {
+//                if (dataSnapshot.exists()) {
+//                   Weight = (int) dataSnapshot.getValue();
+//                }
+//            }
+//        });
+//
+//        databaseUserReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey);
+//
+//        databaseUserReference.child("height").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+//            @Override
+//            public void onSuccess(DataSnapshot dataSnapshot) {
+//                if (dataSnapshot.exists()) {
+//                    Height = (int) dataSnapshot.getValue();
+//                }
+//            }
+//        });
+
+//        int BMI_int = Weight/(Height*Height);
+//        BMI.setText(String.valueOf(BMI_int));
+//    }
     private void setupUI() {
         startRunning = findViewById(R.id.startRunningButtonID);
+        BMI = findViewById(R.id.BMI);
     }
+
     //this function creates the map and the current location marker
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
     }
-
-
 
     //this function creates a custom marker
     private BitmapDescriptor BitmapFromVector(Context context, int vectorResId) {

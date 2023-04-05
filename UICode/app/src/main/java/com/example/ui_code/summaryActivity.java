@@ -92,40 +92,49 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
-        databaseLocationReference.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        String data_string = snapshot.getValue().toString();
+        for(int n = 1; n <= entry_count; n++) {
+            databaseLocationReference.child(String.valueOf(n)).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+                @Override
+                public void onSuccess(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        String data_string = dataSnapshot.getValue().toString();
                         if (data_string.length() > 4) {
-                            Latitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']'))));
-                            Longitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}'))));
+                            double latitude = Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']')));
+                            double longitude = Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}')));
+
+                            LatLng location = new LatLng(latitude, longitude);
+                            Locations.add(location);
+
+//                            Latitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']'))));
+//                            Longitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}'))));
                         }
                     }
                 }
-            }
-        });
-        LatLng locations = null;
-        for (int n = 0; n < Latitudes.size(); n++) {
-            locations = new LatLng(Latitudes.get(n), Longitudes.get(n));
+            });
         }
+
         path = path.color(Color.RED);
         path = path.width(8);
+
+        for (int n = 0; n < Locations.size(); n++) {
+            path = path.add(Locations.get(n));
+        }
+
+
         //use these as example to show feature
-        path = path.add(new LatLng(45.3685642, -73.981979));
-        path = path.add(new LatLng(45.368895, -73.980917));
-        path = path.add(new LatLng(45.368567, -73.979796));
-        path = path.add(new LatLng(45.368005, -73.980864));
-        path = path.add(new LatLng(45.36758727681062, -73.98175357408874));
-        path = path.add(new LatLng(45.365683999463634, -73.98093281819594));
-        path = path.add(new LatLng(45.364221635949875, -73.97848664348376));
-        path = path.add(new LatLng(45.36518649859342, -73.97642670688406));
-        path = path.add(new LatLng(45.36601566427978, -73.97477446606969));
-        path = path.add(new LatLng(45.3676136584105, -73.9749246697801));
-        path = path.add(new LatLng(45.36880458694109, -73.97672711430485));
-        path = path.add(new LatLng(45.36915884565252, -73.9791518313441));
-        path = path.add(new LatLng(45.368601075614094, -73.97974728176744));
+//        path = path.add(new LatLng(45.3685642, -73.981979));
+//        path = path.add(new LatLng(45.368895, -73.980917));
+//        path = path.add(new LatLng(45.368567, -73.979796));
+//        path = path.add(new LatLng(45.368005, -73.980864));
+//        path = path.add(new LatLng(45.36758727681062, -73.98175357408874));
+//        path = path.add(new LatLng(45.365683999463634, -73.98093281819594));
+//        path = path.add(new LatLng(45.364221635949875, -73.97848664348376));
+//        path = path.add(new LatLng(45.36518649859342, -73.97642670688406));
+//        path = path.add(new LatLng(45.36601566427978, -73.97477446606969));
+//        path = path.add(new LatLng(45.3676136584105, -73.9749246697801));
+//        path = path.add(new LatLng(45.36880458694109, -73.97672711430485));
+//        path = path.add(new LatLng(45.36915884565252, -73.9791518313441));
+//        path = path.add(new LatLng(45.368601075614094, -73.97974728176744));
 
         if (path != null) {
 //            Polyline polyline = pathMap.addPolyline(path);
@@ -139,7 +148,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
             @Override
             public void onClick(View view) {
                 Polyline polyline = pathMap.addPolyline(finalPath);
-                pathMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.368567, -73.979796), 16));
+               // pathMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Locations.get(0), 15));
             }
         });
     }
@@ -178,7 +187,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                     String output = dataSnapshot.getValue().toString();
-                    text.setText(dataSnapshot.getValue().toString());
                     double weight = Double.parseDouble(output);
                     double CaloriesBurned =  (11.6 * 3.5 * weight) / 200;
                     resultTextView.setText(String.valueOf(CaloriesBurned));
