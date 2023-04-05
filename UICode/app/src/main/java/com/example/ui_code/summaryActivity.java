@@ -34,19 +34,14 @@ import java.util.ArrayList;
 public class summaryActivity extends AppCompatActivity implements OnMapReadyCallback, EventListener {
 
     GoogleMap pathMap;
-    TextView text, text8, resultTextView, heartbeat_text;
+    TextView text, text8, resultTextView, heartbeat_text, stepsTextView, distanceTextView;
     Button  button;
-
-    private DatabaseReference databasePulseReference;
-
     private Button HBEAT;
-
     GraphView graphView;
-    private DatabaseReference databaseLocationReference, databaseWeightReference;
+    private DatabaseReference databaseUserReference, databaseWeightReference, databaseStepsReference, databasePulseReference;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private String userKey;
-
     private double avg_hb;
     private int entry_count;
 
@@ -57,10 +52,15 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
+
+
         setupUI();
         findLatLng();
         CaloriesBurned();
         HeartBeat();
+        TotalSteps();
+        TotalDistance();
+
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -72,9 +72,12 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         text8 = findViewById(R.id.textView8);
         resultTextView = findViewById(R.id.resultCalBurned);
         heartbeat_text = findViewById(R.id.avg_heartbeat_id);
+        stepsTextView = findViewById(R.id.resultTotalSteps);
+        distanceTextView = findViewById(R.id.resultTotalDistance);
         HBEAT = findViewById(R.id.btn);
         graphView = findViewById(R.id.graph);
         databasePulseReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
+        databaseStepsReference = FirebaseDatabase.getInstance().getReference("AccelerometerData/Acceleration");
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
@@ -87,10 +90,10 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         pathMap = map;
     }
     private void findLatLng() {
-        databaseLocationReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
+        databaseUserReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
         PolylineOptions path = new PolylineOptions();
 
-        databaseLocationReference.child("entry_count").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+        databaseUserReference.child("entry_count").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -100,7 +103,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         });
 
         for(int n = 1; n <= entry_count; n++) {
-            databaseLocationReference.child(String.valueOf(n)).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            databaseUserReference.child(String.valueOf(n)).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
                 @Override
                 public void onSuccess(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
@@ -200,8 +203,8 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     private void HeartBeat(){
-      //  for(int n = 1; n <= entry_count; n++) {
-            databasePulseReference.child(String.valueOf(1)).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+        for(int n = 1; n <= entry_count; n++) {
+            databasePulseReference.child(String.valueOf(n)).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
                 @Override
                 public void onSuccess(DataSnapshot snapshot) {
                     if (snapshot.exists()) {
@@ -212,12 +215,27 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                     }
                 }
             });
-       // }
+        }
         double sum = 0;
         for(int n = 0; n < Heartbeats.size(); n++) {
             sum += Heartbeats.get(n);
         }
         avg_hb = sum / (entry_count * 4);
         //heartbeart.setText(String.valueOf(avg_hb));
+    }
+
+    public void TotalSteps(){
+        databaseStepsReference.child("Step").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                String totalSteps = dataSnapshot.getValue().toString();
+                stepsTextView.setText("Total Steps: " + totalSteps);
+            }
+        });
+    }
+
+    public void TotalDistance(){
+        MainActivity main = new MainActivity();
+        distanceTextView.setText("Total Distance: " + main.distance);
     }
 }

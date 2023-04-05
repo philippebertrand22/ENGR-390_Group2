@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private double longitude, latitude, previousLng, previousLat;
 
     private Location previousLocation;
-    private float distance;
+    public float distance;
 
     private LatLng here;
     private String step;
@@ -345,7 +345,7 @@ public class MainActivity extends AppCompatActivity {
                 + "? | Steps: " + step
                 + " | Latitude: [" + latitude
                 + "] | Longitude: {" + longitude
-                + "} | Distance: " + distance);
+                + "} | Distance: <" + distance + ">");
     }
 
     private void sendGPS() {
