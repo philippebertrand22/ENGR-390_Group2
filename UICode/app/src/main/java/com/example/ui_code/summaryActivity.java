@@ -289,7 +289,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                     String output = dataSnapshot.getValue().toString();
                     double weight = Double.parseDouble(output);
                     double CaloriesBurned =  (11.6 * 3.5 * weight) / 200;
-                    resultTextView.setText(String.valueOf(CaloriesBurned));
+                    resultTextView.setText("Calories burned: " + String.valueOf(CaloriesBurned));
             }
         });
     }
