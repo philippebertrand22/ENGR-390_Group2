@@ -341,8 +341,8 @@ public class MainActivity extends AppCompatActivity {
         return("Date: " + date
                 + " | Time: " + currentTime
                 + " | Running Time: " + currentActivityTime
-                + " | HeartBeat: " + bpm
-                + " | Steps: " + step
+                + " | HeartBeat: !" + bpm
+                + "? | Steps: " + step
                 + " | Latitude: [" + latitude
                 + "] | Longitude: {" + longitude
                 + "} | Distance: " + distance);

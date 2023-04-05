@@ -12,9 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -28,27 +26,31 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.jjoe64.graphview.GraphView;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.EventListener;
 import java.util.ArrayList;
 
-public class summaryActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class summaryActivity extends AppCompatActivity implements OnMapReadyCallback, EventListener {
 
     GoogleMap pathMap;
-    TextView text, text8, resultTextView;
+    TextView text, text8, resultTextView, heartbeat_text;
     Button  button;
-    
+
+    private DatabaseReference databasePulseReference;
+
+    private Button HBEAT;
+
+    GraphView graphView;
     private DatabaseReference databaseLocationReference, databaseWeightReference;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private String userKey;
 
-    private double latitude, longitude;
+    private double avg_hb;
     private int entry_count;
 
-    ArrayList<Double> Latitudes = new ArrayList<>();
-    ArrayList<Double> Longitudes = new ArrayList<>();
+    ArrayList<Double> Heartbeats = new ArrayList<>();
     ArrayList<LatLng> Locations = new ArrayList<>();
 
     @Override
@@ -58,6 +60,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         setupUI();
         findLatLng();
         CaloriesBurned();
+        HeartBeat();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -68,6 +71,10 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         button = findViewById(R.id.button);
         text8 = findViewById(R.id.textView8);
         resultTextView = findViewById(R.id.resultCalBurned);
+        heartbeat_text = findViewById(R.id.avg_heartbeat_id);
+        HBEAT = findViewById(R.id.btn);
+        graphView = findViewById(R.id.graph);
+        databasePulseReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey + "/Activities/Activity_" + MainActivity.latestNodeId);
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
@@ -98,7 +105,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                 public void onSuccess(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
                         String data_string = dataSnapshot.getValue().toString();
-                        if (data_string.length() > 4) {
                             double latitude = Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']')));
                             double longitude = Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}')));
 
@@ -107,7 +113,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
 
 //                            Latitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('[') + 1, data_string.indexOf(']'))));
 //                            Longitudes.add(Double.parseDouble(data_string.substring(data_string.indexOf('{') + 1, data_string.indexOf('}'))));
-                        }
                     }
                 }
             });
@@ -192,5 +197,27 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                     resultTextView.setText(String.valueOf(CaloriesBurned));
             }
         });
+    }
+
+    private void HeartBeat(){
+      //  for(int n = 1; n <= entry_count; n++) {
+            databasePulseReference.child(String.valueOf(1)).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+                @Override
+                public void onSuccess(DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String x_value = snapshot.getValue().toString();
+                        double heartbeat = Double.parseDouble(x_value.substring(x_value.indexOf('!') + 1, x_value.indexOf('?')));
+                        heartbeat_text.setText(String.valueOf(heartbeat));
+                        Heartbeats.add(heartbeat);
+                    }
+                }
+            });
+       // }
+        double sum = 0;
+        for(int n = 0; n < Heartbeats.size(); n++) {
+            sum += Heartbeats.get(n);
+        }
+        avg_hb = sum / (entry_count * 4);
+        //heartbeart.setText(String.valueOf(avg_hb));
     }
 }
