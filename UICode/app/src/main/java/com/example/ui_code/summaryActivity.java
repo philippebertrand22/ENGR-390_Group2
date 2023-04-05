@@ -18,6 +18,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -37,7 +38,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
     TextView text, text8;
     Button  button;
     
-    private DatabaseReference databaseLocationReference;
+    private DatabaseReference databaseLocationReference, databaseWeightReference, databaseStepsReference, databaseDistanceReference;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private String userKey;
@@ -69,6 +70,10 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser(); // Use this to get any user info from the database
         userKey = user.getUid(); // Userkey is unique to whoever logged in
+        databaseWeightReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey);
+        databaseStepsReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey);
+        databaseDistanceReference = FirebaseDatabase.getInstance().getReference("Users/" + userKey);
+
     }
 //This is a test
     @Override
@@ -150,7 +155,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
                 return super.onOptionsItemSelected(item);
         }
     }
- 
+
     private DatabaseReference reference;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -165,4 +170,28 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         resultTextView.setText("Calories Burned: " + String.valueOf(CaloriesBurned));
     }
 
+    public void TotalSteps(){
+        databaseStepsReference.child("Step").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                int totalSteps = dataSnapshot.child("Step").getValue(Integer.class);
+
+                TextView resultTextView = findViewById(R.id.resultTotalSteps);
+                resultTextView.setText("Total Steps: " + totalSteps);
+            }
+        });
+
+    }
+
+    public void TotalDistance(DataSnapshot dataSnapshot){
+        Task<DataSnapshot> dataSnapshotTask = databaseDistanceReference.child("Distance").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+
+                int totalDistance = dataSnapshot.child("Distance").getValue(Integer.class);
+                TextView resultTextView = findViewById(R.id.resultTotalDistance);
+                resultTextView.setText("Total Distance: " + totalDistance);
+            }
+        });
+    };
 }
