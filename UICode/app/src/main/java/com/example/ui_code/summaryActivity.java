@@ -28,7 +28,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.ValueEventListener;
-import com.jjoe64.graphview.GraphView;
 
 import java.util.EventListener;
 import java.util.ArrayList;
@@ -38,8 +37,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
     GoogleMap pathMap;
     TextView text, text8, resultTextView, heartbeat_text, stepsTextView, distanceTextView;
     Button  button;
-    private Button HBEAT;
-    GraphView graphView;
     private DatabaseReference databaseUserReference, databaseWeightReference, databaseStepsReference, databasePulseReference, currentActivityReference;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -80,6 +77,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         mapFragment.getMapAsync(this);
     }
 
+    //function to generate UI and fetch data from database
     private void setupUI() {
         totalEntries = 0; // Stores the number of entries in the current activity
 
@@ -90,8 +88,6 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
         heartbeat_text = findViewById(R.id.avg_heartbeat_id);
         stepsTextView = findViewById(R.id.resultTotalSteps);
         distanceTextView = findViewById(R.id.resultTotalDistance);
-        HBEAT = findViewById(R.id.btn);
-        graphView = findViewById(R.id.graph);
 
 
         mAuth = FirebaseAuth.getInstance();
@@ -253,7 +249,7 @@ public class summaryActivity extends AppCompatActivity implements OnMapReadyCall
             path = path.add(Locations.get(n));
         }
 
-
+        //hardcoded latitudes and longitudes to generate a line on the map
         //use these as example to show feature
 //        path = path.add(new LatLng(45.3685642, -73.981979));
 //        path = path.add(new LatLng(45.368895, -73.980917));

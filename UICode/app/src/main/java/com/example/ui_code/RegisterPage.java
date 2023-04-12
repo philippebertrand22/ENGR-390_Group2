@@ -49,6 +49,7 @@ public class RegisterPage extends AppCompatActivity {
         onClickListeners();
     }
 
+    //generates the UI
     private void setupUI(){
         surname = findViewById(R.id.surname);
         name = findViewById(R.id.name4);
@@ -58,6 +59,7 @@ public class RegisterPage extends AppCompatActivity {
         login_link = findViewById(R.id.textView7);
     }
 
+    //this function check if the information entered by the user is correct
     private void onClickListeners() {
         login_link.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView stopButton, playButton, pauseButton;
 
-    private TextView timeValue, timeText, distanceValue, distanceText, speedValue, speedText, BPMValue, BPMText, stepText, stepValue;
+    private TextView timeValue, timeText, distanceValue, distanceText, BPMValue, BPMText, stepText, stepValue;
 
     private FirebaseAuth mAuth;
 
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
     boolean timerStarted = false;
 
-    private long bpm, altitude;
+    private long bpm;
     private double longitude, latitude, previousLng, previousLat;
 
     private Location previousLocation;
@@ -190,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    //function to generate UI and fetch data from database
     private void setupUI() {
         stopButton = findViewById(R.id.stopButtonID);
         playButton = findViewById(R.id.playButtonID);
@@ -292,6 +293,7 @@ public class MainActivity extends AppCompatActivity {
         void onNewFolderCreated(DatabaseReference newFolder);
     }
 
+    //this function sends all the data back to the database as a string in order to later fetch it
     private String getData(){
         currentActivityTime = getTimerText();
 
@@ -348,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
                 + " | Distance: " + distance);
     }
 
+    //this functions finds current location makes it ready to send to database
     private void sendGPS() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityResultLauncher<String[]> locationPermissionRequest =
@@ -409,6 +412,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //menu for logout and settings
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Check if the user clicked the back button in the top left corner

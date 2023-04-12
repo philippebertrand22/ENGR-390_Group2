@@ -30,8 +30,6 @@ public class LoginPage extends AppCompatActivity {
 
     private TextView register_link, run, master;
 
-    private UserInfo user;
-
     private FirebaseAuth mAuth;
     boolean checkPass, checkEmail = false;
 
@@ -49,6 +47,7 @@ public class LoginPage extends AppCompatActivity {
         super.onStart();
     }
 
+    //function to generate UI
     private void setupUI(){
         email = findViewById(R.id.email3);
         password = findViewById(R.id.password);
@@ -58,6 +57,7 @@ public class LoginPage extends AppCompatActivity {
         master = findViewById(R.id.textView3);
     }
 
+    //this function check if the information entered by the user is correct
     private void onClickListeners() {
         register_link.setOnClickListener(new View.OnClickListener() {
             @Override

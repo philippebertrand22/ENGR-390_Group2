@@ -22,7 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class ChangeInfoActivity extends AppCompatActivity {
-    private String name, surname, email, gender, Date_of_birth, Weight, Height, userKey;
+    private String gender, userKey;
     private EditText genderEditText, age, weight, height;
     private Button confirm, edit;
     private FirebaseAuth mAuth;
@@ -39,6 +39,7 @@ public class ChangeInfoActivity extends AppCompatActivity {
         onClickListeners();
     }
 
+    //function to generate UI and fetch data from database
     private void setupUI() {
         genderEditText = findViewById(R.id.gender);
         age = findViewById(R.id.age);
@@ -85,6 +86,7 @@ public class ChangeInfoActivity extends AppCompatActivity {
         });
     }
 
+    //this function check if the information entered by the user is correct
     private void onClickListeners() {
 
         edit.setOnClickListener(new View.OnClickListener() {

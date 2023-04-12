@@ -132,33 +132,5 @@
         app:layout_constraintVertical_bias="0.527"
         android:fontFamily="@font/averia_sans_libre_light"/>
 
-    <!--    <Button-->
-<!--        android:id="@+id/btn"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:hint="Get Pulse"-->
-<!--        android:textColor="#FFFFFF"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintHorizontal_bias="0.947"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintVertical_bias="0.972" />-->
-
-<!--    <com.jjoe64.graphview.helper.GraphViewXML-->
-<!--        android:id="@+id/graph"-->
-<!--        android:layout_width="375dp"-->
-<!--        android:layout_height="183dp"-->
-<!--        android:title="Pulse"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintVertical_bias="0.571"-->
-<!--        app:seriesColor="#00cc00"-->
-<!--        app:seriesData="0=5;2=5;3=0;4=2"-->
-<!--        app:seriesTitle="Foobar"-->
-<!--        app:seriesType="line" />-->
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

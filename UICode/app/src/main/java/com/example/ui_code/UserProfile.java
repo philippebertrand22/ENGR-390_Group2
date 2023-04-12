@@ -21,13 +21,9 @@ import java.util.List;
 
 public class UserProfile extends AppCompatActivity {
 
-    private String name, surname, email, Gender, Age, Weight, Height;
+    private String Gender;
 
     private EditText gender, age, weight, height;
-
-    private List<UserInfo> user_queue;
-
-    private UserInfo user_info;
 
     private FirebaseUser new_user;
 
@@ -47,6 +43,7 @@ public class UserProfile extends AppCompatActivity {
         onClickListeners();
     }
 
+    //function to generate UI and fetch data from database
     private void setupUI() {
         gender = findViewById(R.id.gender);
         age = findViewById(R.id.age);
@@ -57,6 +54,7 @@ public class UserProfile extends AppCompatActivity {
         reference = FirebaseDatabase.getInstance().getReference("Users/" + mAuth.getUid().toString());
     }
 
+    //this function check if the information entered by the user is correct
     private void onClickListeners() {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +98,7 @@ public class UserProfile extends AppCompatActivity {
                         gender.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //red
                     }
 
-                    if(checkAge == true && checkHeight == true && checkGender == true && checkWeight == true){
+                    if(checkAge && checkHeight && checkGender && checkWeight){
                         reference.child("gender").setValue(gender.getText().toString());
                         reference.child("age").setValue(age.getText().toString());
                         reference.child("height").setValue(height.getText().toString());

@@ -61,15 +61,12 @@ import java.util.TimerTask;
 
 public class homeActivity extends AppCompatActivity implements EventListener, OnMapReadyCallback {
     private static final int REQUEST_CODE = 99;
-    private Button startRunning, graph;
+    private Button startRunning;
 
     private static final String TAG = homeActivity.class.getSimpleName();
     private GoogleMap map;
     public double locationLatitude, locationLongitude;
-
     private int weight, height;
-
-    private TextView BMI, BMI2;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private String userKey;
@@ -94,9 +91,9 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
 
         setupUI();
         onClickListeners();
-       // calculateBMI();
     }
 
+    //function to ask user to allow location tracking and then prints current location on a map
     private void onClickListeners() {
         startRunning.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,8 +136,6 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
                 if(location != null){
 
                     //THESE GET CURRENT LOCATION
-//                    Latitude.setText(String.valueOf(location.getLatitude()));
-//                    Longitude.setText(String.valueOf(location.getLongitude()));
                     locationLatitude = location.getLatitude();
                     locationLongitude = location.getLongitude();
 
@@ -158,39 +153,8 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
         startActivity(intent);
     }
 
-    //TODO FIX THIS FUNCTION
-    private void calculateBMI(){
-        reference = FirebaseDatabase.getInstance().getReference("Users/" + userKey);
-
-        reference.child("height").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                BMI.setText((String) dataSnapshot.getValue());
-                String output = BMI.getText().toString();
-                BMI.setText(output);
-                height = Integer.parseInt(output);
-                height = height*height;
-            }
-        });
-
-        reference.child("weight").get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                BMI2.setText((String) dataSnapshot.getValue());
-                String output = BMI2.getText().toString();
-                BMI2.setText(output);
-                weight = Integer.parseInt(output);
-            }
-        });
-        if(height != 0) {
-            int bmi = weight / height;
-            BMI.setText(String.valueOf(bmi));
-        }
-    }
     private void setupUI() {
         startRunning = findViewById(R.id.startRunningButtonID);
-       // BMI = findViewById(R.id.BMI);
-      //  BMI2 = findViewById(R.id.BMI2);
     }
 
     //this function creates the map and the current location marker
@@ -224,6 +188,8 @@ public class homeActivity extends AppCompatActivity implements EventListener, On
         map.animateCamera(CameraUpdateFactory.zoomTo(16), 2000, null);
     }
 
+
+    //menu for logout and settings
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.dropdown_menu,menu);
